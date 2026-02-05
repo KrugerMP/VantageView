@@ -35,7 +35,7 @@ public class AdminArticlesController : ControllerBase
     /// <returns>The created article.</returns>
     [HttpPost]
     [ProducesResponseType(typeof(ArticleDto), StatusCodes.Status201Created)]
-    public async Task<ActionResult<ArticleDto>> CreateArticle([FromBody] CreateArticleDto dto, CancellationToken ct)
+    public async Task<ActionResult<ArticleDto>> CreateArticleAsync([FromBody] CreateArticleDto dto, CancellationToken ct)
     {
         DateTime now = DateTime.UtcNow;
         DateTime publishedAt = dto.PublishedAt ?? now;
@@ -52,7 +52,7 @@ public class AdminArticlesController : ControllerBase
         _db.Articles.Add(article);
         await _db.SaveChangesAsync(ct);
         ArticleDto result = new ArticleDto(article.Id, article.Title, article.Summary, article.Content, article.Author, article.PublishedAt);
-        return CreatedAtAction(nameof(ArticlesController.GetArticle), "Articles", new { id = article.Id }, result);
+        return CreatedAtAction(nameof(ArticlesController.GetArticleAsync), "Articles", new { id = article.Id }, result);
     }
 
     /// <summary>
@@ -65,7 +65,7 @@ public class AdminArticlesController : ControllerBase
     [HttpPut("{id:int}")]
     [ProducesResponseType(typeof(ArticleDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<ArticleDto>> UpdateArticle(int id, [FromBody] UpdateArticleDto dto, CancellationToken ct)
+    public async Task<ActionResult<ArticleDto>> UpdateArticleAsync(int id, [FromBody] UpdateArticleDto dto, CancellationToken ct)
     {
         Article? article = await _db.Articles.FindAsync([id], ct);
         if (article is null)
@@ -91,7 +91,7 @@ public class AdminArticlesController : ControllerBase
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult> DeleteArticle(int id, CancellationToken ct)
+    public async Task<ActionResult> DeleteArticleAsync(int id, CancellationToken ct)
     {
         Article? article = await _db.Articles.FindAsync([id], ct);
         if (article is null)

@@ -1,5 +1,4 @@
 using VantageView.Admin.Portal.Components;
-
 using VantageView.Admin.Portal.Services;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);

@@ -32,7 +32,7 @@ public class ArticlesController : ControllerBase
     /// <returns>List of article summaries.</returns>
     [HttpGet]
     [ProducesResponseType(typeof(List<ArticleListItemDto>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<List<ArticleListItemDto>>> GetArticles(CancellationToken ct)
+    public async Task<ActionResult<List<ArticleListItemDto>>> GetArticlesAsync(CancellationToken ct)
     {
         List<ArticleListItemDto> articles = await _db.Articles
             .OrderByDescending(a => a.PublishedAt)
@@ -50,7 +50,7 @@ public class ArticlesController : ControllerBase
     [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(ArticleDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<ArticleDto>> GetArticle(int id, CancellationToken ct)
+    public async Task<ActionResult<ArticleDto>> GetArticleAsync(int id, CancellationToken ct)
     {
         Article? article = await _db.Articles.FindAsync([id], ct);
         if (article is null)
