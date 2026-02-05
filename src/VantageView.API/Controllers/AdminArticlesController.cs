@@ -16,14 +16,17 @@ namespace VantageView.API.Controllers;
 public class AdminArticlesController : ControllerBase
 {
     private readonly AppDbContext _db;
+    private readonly ILogger<AdminArticlesController> _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AdminArticlesController"/> class.
     /// </summary>
     /// <param name="db">The database context.</param>
-    public AdminArticlesController(AppDbContext db)
+    /// <param name="logger">The logger for diagnostics.</param>
+    public AdminArticlesController(AppDbContext db, ILogger<AdminArticlesController> logger)
     {
         _db = db;
+        _logger = logger;
     }
 
     /// <summary>
@@ -36,25 +39,33 @@ public class AdminArticlesController : ControllerBase
     [ProducesResponseType(typeof(ArticleDto), StatusCodes.Status201Created)]
     public async Task<ActionResult<ArticleDto>> CreateArticleAsync([FromBody] CreateArticleDto dto, CancellationToken ct)
     {
-        DateTime now = DateTime.UtcNow;
-        DateTime publishedAt = dto.PublishedAt ?? now;
-
-        Article article = new()
+        try
         {
-            Id = Guid.NewGuid(),
-            Title = dto.Title,
-            Summary = dto.Summary,
-            Content = dto.Content,
-            Author = dto.Author,
-            PublishedAt = publishedAt,
-            CreatedAt = now,
-            UpdatedAt = now
-        };
-        _db.Articles.Add(article);
-        await _db.SaveChangesAsync(ct);
+            DateTime now = DateTime.UtcNow;
+            DateTime publishedAt = dto.PublishedAt ?? now;
 
-        ArticleDto result = new(article.Id, article.Title, article.Summary, article.Content, article.Author, article.PublishedAt);
-        return CreatedAtAction(nameof(ArticlesController.GetArticleAsync), "Articles", new { id = article.Id }, result);
+            Article article = new()
+            {
+                Id = Guid.NewGuid(),
+                Title = dto.Title,
+                Summary = dto.Summary,
+                Content = dto.Content,
+                Author = dto.Author,
+                PublishedAt = publishedAt,
+                CreatedAt = now,
+                UpdatedAt = now
+            };
+            _db.Articles.Add(article);
+            await _db.SaveChangesAsync(ct);
+
+            ArticleDto result = new(article.Id, article.Title, article.Summary, article.Content, article.Author, article.PublishedAt);
+            return CreatedAtAction(nameof(ArticlesController.GetArticleAsync), "Articles", new { id = article.Id }, result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating article.");
+            throw;
+        }
     }
 
     /// <summary>
@@ -69,22 +80,30 @@ public class AdminArticlesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ArticleDto>> UpdateArticleAsync(Guid id, [FromBody] UpdateArticleDto dto, CancellationToken ct)
     {
-        Article? article = await _db.Articles.FindAsync([id], ct);
-        if (article is null)
+        try
         {
-            return NotFound();
+            Article? article = await _db.Articles.FindAsync([id], ct);
+            if (article is null)
+            {
+                return NotFound();
+            }
+
+            article.Title = dto.Title;
+            article.Summary = dto.Summary;
+            article.Content = dto.Content;
+            article.Author = dto.Author;
+            article.PublishedAt = dto.PublishedAt ?? article.PublishedAt;
+            article.UpdatedAt = DateTime.UtcNow;
+
+            await _db.SaveChangesAsync(ct);
+
+            return Ok(new ArticleDto(article.Id, article.Title, article.Summary, article.Content, article.Author, article.PublishedAt));
         }
-
-        article.Title = dto.Title;
-        article.Summary = dto.Summary;
-        article.Content = dto.Content;
-        article.Author = dto.Author;
-        article.PublishedAt = dto.PublishedAt ?? article.PublishedAt;
-        article.UpdatedAt = DateTime.UtcNow;
-
-        await _db.SaveChangesAsync(ct);
-
-        return Ok(new ArticleDto(article.Id, article.Title, article.Summary, article.Content, article.Author, article.PublishedAt));
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating article {ArticleId}.", id);
+            throw;
+        }
     }
 
     /// <summary>
@@ -98,15 +117,23 @@ public class AdminArticlesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult> DeleteArticleAsync(Guid id, CancellationToken ct)
     {
-        Article? article = await _db.Articles.FindAsync([id], ct);
-        if (article is null)
+        try
         {
-            return NotFound();
-        }
+            Article? article = await _db.Articles.FindAsync([id], ct);
+            if (article is null)
+            {
+                return NotFound();
+            }
 
-        _db.Articles.Remove(article);
-        await _db.SaveChangesAsync(ct);
-        
-        return NoContent();
+            _db.Articles.Remove(article);
+            await _db.SaveChangesAsync(ct);
+
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting article {ArticleId}.", id);
+            throw;
+        }
     }
 }

@@ -15,14 +15,17 @@ namespace VantageView.API.Controllers;
 public class ArticlesController : ControllerBase
 {
     private readonly AppDbContext _db;
+    private readonly ILogger<ArticlesController> _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ArticlesController"/> class.
     /// </summary>
     /// <param name="db">The database context.</param>
-    public ArticlesController(AppDbContext db)
+    /// <param name="logger">The logger for diagnostics.</param>
+    public ArticlesController(AppDbContext db, ILogger<ArticlesController> logger)
     {
         _db = db;
+        _logger = logger;
     }
 
     /// <summary>
@@ -34,12 +37,20 @@ public class ArticlesController : ControllerBase
     [ProducesResponseType(typeof(List<ArticleListItemDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<List<ArticleListItemDto>>> GetArticlesAsync(CancellationToken ct)
     {
-        List<ArticleListItemDto> articles = await _db.Articles
-            .OrderByDescending(a => a.PublishedAt)
-            .Select(a => new ArticleListItemDto(a.Id, a.Title, a.Summary, a.Author, a.PublishedAt))
-            .ToListAsync(ct);
+        try
+        {
+            List<ArticleListItemDto> articles = await _db.Articles
+                .OrderByDescending(a => a.PublishedAt)
+                .Select(a => new ArticleListItemDto(a.Id, a.Title, a.Summary, a.Author, a.PublishedAt))
+                .ToListAsync(ct);
 
-        return Ok(articles);
+            return Ok(articles);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching articles.");
+            throw;
+        }
     }
 
     /// <summary>
@@ -53,12 +64,20 @@ public class ArticlesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ArticleDto>> GetArticleAsync(Guid id, CancellationToken ct)
     {
-        Article? article = await _db.Articles.FindAsync([id], ct);
-        if (article is null)
+        try
         {
-            return NotFound();
-        }
+            Article? article = await _db.Articles.FindAsync([id], ct);
+            if (article is null)
+            {
+                return NotFound();
+            }
 
-        return Ok(new ArticleDto(article.Id, article.Title, article.Summary, article.Content, article.Author, article.PublishedAt));
+            return Ok(new ArticleDto(article.Id, article.Title, article.Summary, article.Content, article.Author, article.PublishedAt));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching article {ArticleId}.", id);
+            throw;
+        }
     }
 }
