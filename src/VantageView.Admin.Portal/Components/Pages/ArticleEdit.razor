@@ -1,0 +1,158 @@
+@page "/articles/new"
+@page "/articles/{Id:int}/edit"
+@rendermode InteractiveServer
+@inject IHttpClientFactory HttpClientFactory
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+@using VantageView.Admin.Portal.Models
+
+<PageTitle>@(IsNew ? "New Article" : "Edit Article")</PageTitle>
+
+@if (!AuthService.IsAuthenticated)
+{
+    <div class="alert alert-warning">Please <a href="/login">log in</a> to edit articles.</div>
+    return;
+}
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title mb-4">@(IsNew ? "Create Article" : "Edit Article")</h4>
+                <EditForm Model="model" OnValidSubmit="HandleSave">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary class="text-danger mb-3" />
+                    <div class="mb-3">
+                        <label class="form-label">Title</label>
+                        <InputText @bind-Value="model.Title" class="form-control" placeholder="Article title" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Summary</label>
+                        <InputTextArea @bind-Value="model.Summary" class="form-control" rows="2" placeholder="Brief summary" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Content</label>
+                        <InputTextArea @bind-Value="model.Content" class="form-control" rows="10" placeholder="Full article content" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Author</label>
+                        <InputText @bind-Value="model.Author" class="form-control" placeholder="Author name" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Publish Date</label>
+                        <InputDate @bind-Value="publishDate" class="form-control" />
+                    </div>
+                    @if (error is not null)
+                    {
+                        <div class="alert alert-danger">@error</div>
+                    }
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary" disabled="@loading">@(loading ? "Saving..." : "Save")</button>
+                        <a href="/articles" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private bool IsNew => Id == 0;
+    private CreateArticleDto model = new();
+    private DateTime publishDate = DateTime.Today;
+    private bool loading;
+    private string? error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AuthService.IsAuthenticated) return;
+        if (!IsNew)
+        {
+            await LoadArticle();
+        }
+        else
+        {
+            publishDate = DateTime.Today;
+        }
+    }
+
+    private async Task LoadArticle()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("Api");
+            var article = await client.GetFromJsonAsync<ArticleDto>($"api/articles/{Id}");
+            if (article is not null)
+            {
+                model = new CreateArticleDto
+                {
+                    Title = article.Title,
+                    Summary = article.Summary,
+                    Content = article.Content,
+                    Author = article.Author,
+                    PublishedAt = article.PublishedAt
+                };
+                publishDate = article.PublishedAt.Date;
+            }
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+    }
+
+    private async Task HandleSave()
+    {
+        loading = true;
+        error = null;
+        try
+        {
+            var client = HttpClientFactory.CreateClient("Api");
+            model.PublishedAt = publishDate;
+
+            if (IsNew)
+            {
+                var response = await client.PostAsJsonAsync("api/admin/articles", model);
+                if (response.IsSuccessStatusCode)
+                {
+                    Navigation.NavigateTo("/articles", forceLoad: true);
+                }
+                else
+                {
+                    error = "Failed to create article.";
+                }
+            }
+            else
+            {
+                var updateDto = new UpdateArticleDto
+                {
+                    Title = model.Title,
+                    Summary = model.Summary,
+                    Content = model.Content,
+                    Author = model.Author,
+                    PublishedAt = publishDate
+                };
+                var response = await client.PutAsJsonAsync($"api/admin/articles/{Id}", updateDto);
+                if (response.IsSuccessStatusCode)
+                {
+                    Navigation.NavigateTo("/articles");
+                }
+                else
+                {
+                    error = "Failed to update article.";
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+}

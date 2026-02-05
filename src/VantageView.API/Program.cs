@@ -33,7 +33,7 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("http://localhost:5*", "https://localhost:7*")
+        policy.SetIsOriginAllowed(origin => new Uri(origin).Host is "localhost" or "127.0.0.1")
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -44,6 +44,21 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+// Apply migrations and seed sample data when database is empty
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+    if (!db.Articles.Any())
+    {
+        var now = DateTime.UtcNow;
+        db.Articles.AddRange(
+            new Article { Title = "Welcome to VantageView", Summary = "Your corporate news system is ready.", Content = "This is the first article. Edit or delete it from the Admin Portal.", Author = "System", PublishedAt = now, CreatedAt = now, UpdatedAt = now },
+            new Article { Title = "Getting Started", Summary = "Learn how to manage your news.", Content = "Use the Admin Portal to create, edit, and delete articles. Log in with admin/admin.", Author = "Admin", PublishedAt = now.AddDays(-1), CreatedAt = now, UpdatedAt = now });
+        db.SaveChanges();
+    }
+}
 
 app.UseCors();
 app.UseAuthentication();

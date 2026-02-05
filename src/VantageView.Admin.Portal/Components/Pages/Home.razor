@@ -1,7 +1,14 @@
-﻿@page "/"
+@page "/"
+@inject AuthService AuthService
+@inject NavigationManager Navigation
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Admin Portal</PageTitle>
 
-<h1>Hello, world!</h1>
-
-Welcome to your new app.
+@if (AuthService.IsAuthenticated)
+{
+    <p>Welcome to the Admin Portal. <a href="/articles">Manage articles</a>.</p>
+}
+else
+{
+    <p>Please <a href="/login">log in</a> to manage articles.</p>
+}

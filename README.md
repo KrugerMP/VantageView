@@ -43,27 +43,28 @@ VantageView demonstrates a scalable C# application with database interactions, s
 ```
 src/
 ├── VantageView.API/          # REST API — public article endpoints, admin CRUD
-├── VantageView.Auth/         # Auth service — JWT token issuance
+├── VantageView.Auth/         # Auth service — JWT token issuance (admin/admin)
+├── VantageView.Data/         # EF Core DbContext, Article entity, migrations
 ├── VantageView.Frontend/     # Public Blazor app — article listing & detail
-├── VantageView.Admin.Portal/ # Admin Blazor app — article management
+├── VantageView.Admin.Portal/ # Admin Blazor app — article management (JWT)
 └── VantageView.slnx          # Solution file
 ```
 
 ## Prerequisites
 
-- [.NET SDK](https://dotnet.microsoft.com/download) 6.0 or later (minimum: .NET 6; project targets .NET 10)
-- SQLite (no separate installation needed when using EF Core SQLite provider)
+- [.NET SDK](https://dotnet.microsoft.com/download) 6.0 or later (project targets .NET 10)
+- SQLite (no separate installation needed; EF Core SQLite provider)
 
 ## Setup & Run
 
-### 1. Apply EF Core Migrations
+### 1. Apply EF Core Migrations (optional)
+
+Migrations are applied automatically when the API starts. To run manually:
 
 ```bash
-cd src/VantageView.API
-dotnet ef database update
+cd src
+dotnet ef database update --project VantageView.Data --startup-project VantageView.API
 ```
-
-> **Note:** Migrations will be added once the EF Core DbContext and models are in place.
 
 ### 2. Run the API
 
@@ -72,9 +73,11 @@ cd src/VantageView.API
 dotnet run
 ```
 
-API will be available at `https://localhost:5xxx` (port from `launchSettings.json`). Swagger UI is enabled in Development.
+API runs at `http://localhost:5157` / `https://localhost:7021`. Swagger UI is enabled in Development. Sample articles are seeded when the database is empty.
 
-### 3. Run the Auth Service (for JWT)
+### 3. Run the Auth Service (JWT)
+
+Admin login uses JWT tokens from this service. Demo credentials: **admin** / **admin**.
 
 ```bash
 cd src/VantageView.Auth
@@ -94,4 +97,6 @@ dotnet run
 cd src/VantageView.Admin.Portal
 dotnet run
 ```
+
+Log in at `/login` with **admin** / **admin**, then manage articles at `/articles`.
 

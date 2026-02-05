@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace VantageView.Admin.Portal.Models;
 
 public record ArticleDto(
@@ -15,16 +17,28 @@ public record ArticleListItemDto(
     string Author,
     DateTime PublishedAt);
 
-public record CreateArticleDto(
-    string Title,
-    string Summary,
-    string Content,
-    string Author,
-    DateTime? PublishedAt);
+public class CreateArticleDto
+{
+    [Required]
+    public string Title { get; set; } = "";
+    [Required]
+    public string Summary { get; set; } = "";
+    [Required]
+    public string Content { get; set; } = "";
+    [Required]
+    public string Author { get; set; } = "";
+    public DateTime? PublishedAt { get; set; }
+}
 
-public record UpdateArticleDto(
-    string Title,
-    string Summary,
-    string Content,
-    string Author,
-    DateTime? PublishedAt);
+public class UpdateArticleDto
+{
+    [Required]
+    public string Title { get; set; } = "";
+    [Required]
+    public string Summary { get; set; } = "";
+    [Required]
+    public string Content { get; set; } = "";
+    [Required]
+    public string Author { get; set; } = "";
+    public DateTime? PublishedAt { get; set; }
+}
