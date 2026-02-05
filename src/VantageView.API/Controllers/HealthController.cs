@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VantageView.Data;
 using VantageView.Data.Entities;
+using VantageView.API.Models;
 
 namespace VantageView.API.Controllers;
 
@@ -32,15 +33,15 @@ public class HealthController : ControllerBase
     [HttpGet("articles")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult> GetArticlesServiceHealthAsync(CancellationToken ct)
+    public async Task<ActionResult<HealthDto>> GetArticlesServiceHealthAsync(CancellationToken ct)
     {
         Article? article = await _db.Articles.FirstOrDefaultAsync(ct);
 
         if (article is null)
         {
-            return BadRequest();
+            return BadRequest(new HealthDto { IsHealthy = false, Message = "No articles found" });
         }
 
-        return Ok();
+        return Ok(new HealthDto { IsHealthy = true, Message = "Articles service is healthy" });
     }
 }

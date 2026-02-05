@@ -1,15 +1,16 @@
 meta {
-  name: CreateArticle
+  name: Articles Health
   type: http
   seq: 1
 }
 
 get {
-  url: 
+  url: http://localhost:5157/api/health/articles
   body: none
   auth: inherit
 }
 
 settings {
   encodeUrl: true
+  timeout: 0
 }
