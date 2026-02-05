@@ -16,13 +16,13 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<AppDbConte
     /// <returns>A configured <see cref="AppDbContext"/> instance.</returns>
     public AppDbContext CreateDbContext(string[] args)
     {
-        var configuration = new ConfigurationBuilder()
+        IConfigurationRoot configuration = new ConfigurationBuilder()
             .SetBasePath(Path.Combine(Directory.GetCurrentDirectory(), "../VantageView.API"))
             .AddJsonFile("appsettings.json", optional: false)
             .AddJsonFile("appsettings.Development.json", optional: true)
             .Build();
 
-        var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
+        DbContextOptionsBuilder<AppDbContext> optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
         optionsBuilder.UseSqlite(configuration.GetConnectionString("DefaultConnection"));
 
         return new AppDbContext(optionsBuilder.Options);

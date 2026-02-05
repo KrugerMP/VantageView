@@ -83,8 +83,8 @@
     {
         try
         {
-            var client = HttpClientFactory.CreateClient("Api");
-            var article = await client.GetFromJsonAsync<ArticleDto>($"api/articles/{Id}");
+            HttpClient client = HttpClientFactory.CreateClient("Api");
+            ArticleDto? article = await client.GetFromJsonAsync<ArticleDto>($"api/articles/{Id}");
             if (article is not null)
             {
                 model = new CreateArticleDto
@@ -110,12 +110,12 @@
         error = null;
         try
         {
-            var client = HttpClientFactory.CreateClient("Api");
+            HttpClient client = HttpClientFactory.CreateClient("Api");
             model.PublishedAt = publishDate;
 
             if (IsNew)
             {
-                var response = await client.PostAsJsonAsync("api/admin/articles", model);
+                HttpResponseMessage response = await client.PostAsJsonAsync("api/admin/articles", model);
                 if (response.IsSuccessStatusCode)
                 {
                     Navigation.NavigateTo("/articles", forceLoad: true);
@@ -127,7 +127,7 @@
             }
             else
             {
-                var updateDto = new UpdateArticleDto
+                UpdateArticleDto updateDto = new UpdateArticleDto
                 {
                     Title = model.Title,
                     Summary = model.Summary,
@@ -135,7 +135,7 @@
                     Author = model.Author,
                     PublishedAt = publishDate
                 };
-                var response = await client.PutAsJsonAsync($"api/admin/articles/{Id}", updateDto);
+                HttpResponseMessage response = await client.PutAsJsonAsync($"api/admin/articles/{Id}", updateDto);
                 if (response.IsSuccessStatusCode)
                 {
                     Navigation.NavigateTo("/articles");

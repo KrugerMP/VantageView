@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using VantageView.Auth.Models;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -19,7 +19,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 app.UseCors();
 
@@ -39,13 +39,13 @@ app.MapPost("/api/auth/login", (LoginRequest request) =>
         return Results.Unauthorized();
     }
 
-    var key = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key not configured");
-    var issuer = builder.Configuration["Jwt:Issuer"] ?? "VantageView.Auth";
-    var audience = builder.Configuration["Jwt:Audience"] ?? "VantageView.API";
+    string key = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key not configured");
+    string issuer = builder.Configuration["Jwt:Issuer"] ?? "VantageView.Auth";
+    string audience = builder.Configuration["Jwt:Audience"] ?? "VantageView.API";
 
-    var tokenHandler = new JwtSecurityTokenHandler();
-    var tokenKey = Encoding.UTF8.GetBytes(key);
-    var tokenDescriptor = new SecurityTokenDescriptor
+    JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+    byte[] tokenKey = Encoding.UTF8.GetBytes(key);
+    SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
     {
         Subject = new ClaimsIdentity(new[]
         {
@@ -60,8 +60,8 @@ app.MapPost("/api/auth/login", (LoginRequest request) =>
             SecurityAlgorithms.HmacSha256Signature)
     };
 
-    var token = tokenHandler.CreateToken(tokenDescriptor);
-    var tokenString = tokenHandler.WriteToken(token);
+    SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
+    string tokenString = tokenHandler.WriteToken(token);
 
     return Results.Ok(new LoginResponse(tokenString));
 })

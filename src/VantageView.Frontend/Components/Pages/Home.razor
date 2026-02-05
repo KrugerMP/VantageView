@@ -22,7 +22,7 @@ else if (articles.Count == 0)
 else
 {
     <div class="row g-4">
-        @foreach (var article in articles)
+        @foreach (ArticleListItemDto article in articles)
         {
             <div class="col-12 col-md-6 col-lg-4">
                 <div class="card h-100 shadow-sm">
@@ -54,8 +54,8 @@ else
     {
         try
         {
-            var client = HttpClientFactory.CreateClient("Api");
-            var result = await client.GetFromJsonAsync<List<ArticleListItemDto>>("api/articles");
+            HttpClient client = HttpClientFactory.CreateClient("Api");
+            List<ArticleListItemDto>? result = await client.GetFromJsonAsync<List<ArticleListItemDto>>("api/articles");
             articles = result ?? [];
         }
         catch (Exception ex)

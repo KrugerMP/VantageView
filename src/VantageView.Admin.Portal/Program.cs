@@ -2,11 +2,11 @@ using VantageView.Admin.Portal.Components;
 
 using VantageView.Admin.Portal.Services;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-var apiBaseUrl = builder.Configuration["ApiBaseUrl"] ?? "https://localhost:7021";
-var authBaseUrl = builder.Configuration["AuthBaseUrl"] ?? "https://localhost:7128";
+string apiBaseUrl = builder.Configuration["ApiBaseUrl"] ?? "https://localhost:7021";
+string authBaseUrl = builder.Configuration["AuthBaseUrl"] ?? "https://localhost:7128";
 
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<AuthHandler>();
@@ -17,7 +17,7 @@ builder.Services.AddHttpClient("Auth", client => client.BaseAddress = new Uri(au
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
