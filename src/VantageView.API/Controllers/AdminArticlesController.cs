@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using VantageView.API.Models;
 using VantageView.Data;
 using VantageView.Data.Entities;
@@ -39,7 +38,8 @@ public class AdminArticlesController : ControllerBase
     {
         DateTime now = DateTime.UtcNow;
         DateTime publishedAt = dto.PublishedAt ?? now;
-        Article article = new Article
+
+        Article article = new()
         {
             Title = dto.Title,
             Summary = dto.Summary,
@@ -51,7 +51,8 @@ public class AdminArticlesController : ControllerBase
         };
         _db.Articles.Add(article);
         await _db.SaveChangesAsync(ct);
-        ArticleDto result = new ArticleDto(article.Id, article.Title, article.Summary, article.Content, article.Author, article.PublishedAt);
+
+        ArticleDto result = new(article.Id, article.Title, article.Summary, article.Content, article.Author, article.PublishedAt);
         return CreatedAtAction(nameof(ArticlesController.GetArticleAsync), "Articles", new { id = article.Id }, result);
     }
 
@@ -72,13 +73,16 @@ public class AdminArticlesController : ControllerBase
         {
             return NotFound();
         }
+
         article.Title = dto.Title;
         article.Summary = dto.Summary;
         article.Content = dto.Content;
         article.Author = dto.Author;
         article.PublishedAt = dto.PublishedAt ?? article.PublishedAt;
         article.UpdatedAt = DateTime.UtcNow;
+
         await _db.SaveChangesAsync(ct);
+
         return Ok(new ArticleDto(article.Id, article.Title, article.Summary, article.Content, article.Author, article.PublishedAt));
     }
 
@@ -98,8 +102,10 @@ public class AdminArticlesController : ControllerBase
         {
             return NotFound();
         }
+
         _db.Articles.Remove(article);
         await _db.SaveChangesAsync(ct);
+        
         return NoContent();
     }
 }

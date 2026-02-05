@@ -38,6 +38,7 @@ public class ArticlesController : ControllerBase
             .OrderByDescending(a => a.PublishedAt)
             .Select(a => new ArticleListItemDto(a.Id, a.Title, a.Summary, a.Author, a.PublishedAt))
             .ToListAsync(ct);
+
         return Ok(articles);
     }
 
@@ -57,7 +58,7 @@ public class ArticlesController : ControllerBase
         {
             return NotFound();
         }
+
         return Ok(new ArticleDto(article.Id, article.Title, article.Summary, article.Content, article.Author, article.PublishedAt));
     }
-
 }
