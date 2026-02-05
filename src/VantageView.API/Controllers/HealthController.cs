@@ -15,14 +15,17 @@ namespace VantageView.API.Controllers;
 public class HealthController : ControllerBase
 {
     private readonly AppDbContext _db;
+    private readonly ILogger<HealthController> _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="HealthController"/> class.
     /// </summary>
     /// <param name="db">The database context.</param>
-    public HealthController(AppDbContext db)
+    /// <param name="logger">The logger for health check diagnostics.</param>
+    public HealthController(AppDbContext db, ILogger<HealthController> logger)
     {
         _db = db;
+        _logger = logger;
     }
 
     /// <summary>
@@ -35,13 +38,21 @@ public class HealthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<HealthDto>> GetArticlesServiceHealthAsync(CancellationToken ct)
     {
-        Article? article = await _db.Articles.FirstOrDefaultAsync(ct);
-
-        if (article is null)
+        try
         {
-            return BadRequest(new HealthDto { IsHealthy = false, Message = "No articles found" });
-        }
+            Article? article = await _db.Articles.FirstOrDefaultAsync(ct);
 
-        return Ok(new HealthDto { IsHealthy = true, Message = "Articles service is healthy" });
+            if (article is null)
+            {
+                return BadRequest(new HealthDto { IsHealthy = false, Message = "No articles found" });
+            }
+
+            return Ok(new HealthDto { IsHealthy = true, Message = "Articles service is healthy" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error checking articles service health.");
+            return BadRequest(new HealthDto { IsHealthy = false, Message = $"Error checking articles service health." });
+        }
     }
 }
