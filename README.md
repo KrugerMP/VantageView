@@ -66,37 +66,44 @@ cd src
 dotnet ef database update --project VantageView.Data --startup-project VantageView.API
 ```
 
-### 2. Run the API
+### 2. Run All Applications (recommended)
+
+Use the **`http`** launch profile for all projects to avoid port conflicts and SSL setup.
 
 ```bash
-cd src/VantageView.API
-dotnet run
+./scripts/run-all.sh
 ```
 
-API runs at `http://localhost:5157` / `https://localhost:7021`. Swagger UI is enabled in Development. Sample articles are seeded when the database is empty.
+This starts:
 
-### 3. Run the Auth Service (JWT)
+| Application   | URL                      | Port |
+|---------------|--------------------------|------|
+| API           | http://localhost:5157    | 5157 |
+| Auth          | http://localhost:5098    | 5098 |
+| Frontend      | http://localhost:5059    | 5059 |
+| Admin Portal  | http://localhost:5046    | 5046 |
 
-Admin login uses JWT tokens from this service. Demo credentials: **admin** / **admin**.
+Press **Ctrl+C** to stop all applications.
+
+### 3. Run Individually
+
+If you prefer to run each application separately, use the `http` profile so ports match the run-all script:
 
 ```bash
-cd src/VantageView.Auth
-dotnet run
+cd src
+
+# API (5157)
+dotnet run --project VantageView.API --launch-profile http
+
+# Auth (5098)
+dotnet run --project VantageView.Auth --launch-profile http
+
+# Frontend (5059)
+dotnet run --project VantageView.Frontend --launch-profile http
+
+# Admin Portal (5046)
+dotnet run --project VantageView.Admin.Portal --launch-profile http
 ```
 
-### 4. Run the Public Frontend
-
-```bash
-cd src/VantageView.Frontend
-dotnet run
-```
-
-### 5. Run the Admin Portal
-
-```bash
-cd src/VantageView.Admin.Portal
-dotnet run
-```
-
-Log in at `/login` with **admin** / **admin**, then manage articles at `/articles`.
+API runs Swagger at `http://localhost:5157/swagger`. Sample articles are seeded when the database is empty. Log in to the Admin Portal at `http://localhost:5046/login` with **admin** / **admin**, then manage articles at `/articles`.
 
