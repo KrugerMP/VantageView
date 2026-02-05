@@ -1,0 +1,25 @@
+meta {
+  name: Update Article
+  type: http
+  seq: 4
+}
+
+put {
+  url: http://localhost:5157/api/admin/articles/{{articleId}}
+  body: json
+  auth: bearer
+  bearer: {{authToken}}
+}
+
+body:json {
+  "title": "Updated Article",
+  "summary": "Updated brief summary.",
+  "content": "Updated full article content.",
+  "author": "Admin User",
+  "publishedAt": "2025-02-05T12:00:00Z"
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

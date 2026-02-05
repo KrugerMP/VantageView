@@ -1,0 +1,25 @@
+meta {
+  name: Create Article
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost:5157/api/admin/articles
+  body: json
+  auth: bearer
+  bearer: {{authToken}}
+}
+
+body:json {
+  "title": "New Article",
+  "summary": "A brief summary of the article.",
+  "content": "Full article content goes here.",
+  "author": "Admin User",
+  "publishedAt": null
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

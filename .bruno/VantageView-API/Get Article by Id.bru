@@ -1,11 +1,11 @@
 meta {
-  name: Articles Health
+  name: Get Article by Id
   type: http
-  seq: 6
+  seq: 2
 }
 
 get {
-  url: http://localhost:5157/api/health/articles
+  url: http://localhost:5157/api/articles/{{articleId}}
   body: none
   auth: none
 }
