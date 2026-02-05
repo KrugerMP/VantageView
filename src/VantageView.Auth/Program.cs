@@ -1,41 +1,71 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using VantageView.Auth.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("http://localhost:5*", "https://localhost:7*")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+app.UseCors();
+
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
+app.MapPost("/api/auth/login", (LoginRequest request) =>
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+    // Simplified auth for demo: accept admin/admin
+    if (request.Username != "admin" || request.Password != "admin")
+    {
+        return Results.Unauthorized();
+    }
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
+    var key = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key not configured");
+    var issuer = builder.Configuration["Jwt:Issuer"] ?? "VantageView.Auth";
+    var audience = builder.Configuration["Jwt:Audience"] ?? "VantageView.API";
+
+    var tokenHandler = new JwtSecurityTokenHandler();
+    var tokenKey = Encoding.UTF8.GetBytes(key);
+    var tokenDescriptor = new SecurityTokenDescriptor
+    {
+        Subject = new ClaimsIdentity(new[]
+        {
+            new Claim(ClaimTypes.Name, request.Username),
+            new Claim(ClaimTypes.Role, "Admin")
+        }),
+        Expires = DateTime.UtcNow.AddHours(24),
+        Issuer = issuer,
+        Audience = audience,
+        SigningCredentials = new SigningCredentials(
+            new SymmetricSecurityKey(tokenKey),
+            SecurityAlgorithms.HmacSha256Signature)
+    };
+
+    var token = tokenHandler.CreateToken(tokenDescriptor);
+    var tokenString = tokenHandler.WriteToken(token);
+
+    return Results.Ok(new LoginResponse(tokenString));
 })
-.WithName("GetWeatherForecast");
+.WithName("Login")
+.WithTags("Auth");
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

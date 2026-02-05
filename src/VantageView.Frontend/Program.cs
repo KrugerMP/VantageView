@@ -3,6 +3,11 @@ using VantageView.Frontend.Components;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+var apiBaseUrl = builder.Configuration["ApiBaseUrl"] ?? "https://localhost:7021";
+builder.Services.AddHttpClient("Api", client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+});
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
