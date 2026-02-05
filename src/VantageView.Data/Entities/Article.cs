@@ -8,7 +8,7 @@ public class Article
     /// <summary>
     /// Gets or sets the unique identifier.
     /// </summary>
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
     /// <summary>
     /// Gets or sets the article title.

@@ -1,5 +1,5 @@
 @page "/articles/new"
-@page "/articles/{Id:int}/edit"
+@page "/articles/{Id:guid}/edit"
 @rendermode InteractiveServer
 @inject IHttpClientFactory HttpClientFactory
 @inject AuthService AuthService
@@ -58,9 +58,9 @@
 
 @code {
     [Parameter]
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
-    private bool IsNew => Id == 0;
+    private bool IsNew => Id == Guid.Empty;
     private CreateArticleDto model = new();
     private DateTime publishDate = DateTime.Today;
     private bool loading;

@@ -1,4 +1,4 @@
-@page "/article/{Id:int}"
+@page "/article/{Id:guid}"
 @rendermode InteractiveServer
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
@@ -38,7 +38,7 @@ else
 
 @code {
     [Parameter]
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
     private ArticleDto? article;
     private bool loading = true;

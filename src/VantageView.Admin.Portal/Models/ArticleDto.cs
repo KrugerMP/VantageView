@@ -12,7 +12,7 @@ namespace VantageView.Admin.Portal.Models;
 /// <param name="Author">The author name.</param>
 /// <param name="PublishedAt">The publication date.</param>
 public record ArticleDto(
-    int Id,
+    Guid Id,
     string Title,
     string Summary,
     string Content,
@@ -28,7 +28,7 @@ public record ArticleDto(
 /// <param name="Author">The author name.</param>
 /// <param name="PublishedAt">The publication date.</param>
 public record ArticleListItemDto(
-    int Id,
+    Guid Id,
     string Title,
     string Summary,
     string Author,

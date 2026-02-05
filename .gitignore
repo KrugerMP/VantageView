@@ -7,7 +7,11 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/Dotnet.gitignore
 
+# Docs to exclude
 REQUIREMENTS.md
+
+# Folders to exclude
+*.vscode
 
 # Build results
 [Dd]ebug/

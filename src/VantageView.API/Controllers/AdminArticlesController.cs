@@ -41,6 +41,7 @@ public class AdminArticlesController : ControllerBase
 
         Article article = new()
         {
+            Id = Guid.NewGuid(),
             Title = dto.Title,
             Summary = dto.Summary,
             Content = dto.Content,
@@ -63,10 +64,10 @@ public class AdminArticlesController : ControllerBase
     /// <param name="dto">The updated article data.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The updated article, or 404 if not found.</returns>
-    [HttpPut("{id:int}")]
+    [HttpPut("{id:guid}")]
     [ProducesResponseType(typeof(ArticleDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<ArticleDto>> UpdateArticleAsync(int id, [FromBody] UpdateArticleDto dto, CancellationToken ct)
+    public async Task<ActionResult<ArticleDto>> UpdateArticleAsync(Guid id, [FromBody] UpdateArticleDto dto, CancellationToken ct)
     {
         Article? article = await _db.Articles.FindAsync([id], ct);
         if (article is null)
@@ -92,10 +93,10 @@ public class AdminArticlesController : ControllerBase
     /// <param name="id">The article ID.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>204 No Content on success, or 404 if not found.</returns>
-    [HttpDelete("{id:int}")]
+    [HttpDelete("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult> DeleteArticleAsync(int id, CancellationToken ct)
+    public async Task<ActionResult> DeleteArticleAsync(Guid id, CancellationToken ct)
     {
         Article? article = await _db.Articles.FindAsync([id], ct);
         if (article is null)

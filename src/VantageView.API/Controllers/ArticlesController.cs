@@ -48,10 +48,10 @@ public class ArticlesController : ControllerBase
     /// <param name="id">The article ID.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The article if found; otherwise 404.</returns>
-    [HttpGet("{id:int}")]
+    [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(ArticleDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<ArticleDto>> GetArticleAsync(int id, CancellationToken ct)
+    public async Task<ActionResult<ArticleDto>> GetArticleAsync(Guid id, CancellationToken ct)
     {
         Article? article = await _db.Articles.FindAsync([id], ct);
         if (article is null)
