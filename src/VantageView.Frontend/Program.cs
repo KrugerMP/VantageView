@@ -1,4 +1,5 @@
 using VantageView.Frontend.Components;
+using Radzen;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,8 @@ builder.Services.AddHttpClient("Api", client =>
 });
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddRadzenComponents();
 
 WebApplication app = builder.Build();
 

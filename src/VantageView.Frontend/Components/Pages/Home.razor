@@ -3,42 +3,45 @@
 
 <PageTitle>News Articles</PageTitle>
 
-<h1>Corporate News</h1>
+<RadzenText TextStyle="TextStyle.H3" style="margin-bottom: 1.5rem;">Latest Corporate News</RadzenText>
 
 @if (loading)
 {
-    <p><em>Loading articles...</em></p>
+    <RadzenStack Orientation="Orientation.Horizontal" Gap="1rem" AlignItems="AlignItems.Center">
+        <RadzenProgressBarCircular ShowValue="false" Size="ProgressBarCircularSize.Small" />
+        <RadzenText>Loading articles...</RadzenText>
+    </RadzenStack>
 }
 else if (error is not null)
 {
-    <div class="alert alert-danger">@error</div>
+    <RadzenAlert AlertStyle="AlertStyle.Danger" ShowIcon="true" Title="Error" Variant="Variant.Flat">
+        @error
+    </RadzenAlert>
 }
 else if (articles.Count == 0)
 {
-    <p>No articles yet. Check back soon!</p>
+    <RadzenText>No articles yet. Check back soon!</RadzenText>
 }
 else
 {
-    <div class="row g-4">
+    <RadzenRow Gap="1.5rem">
         @foreach (ArticleListItemDto article in articles)
         {
-            <div class="col-12 col-md-6 col-lg-4">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title">
-                            <a href="/article/@article.Id" class="text-decoration-none">@article.Title</a>
-                        </h5>
-                        <p class="card-text text-muted small">@article.Summary</p>
-                        <div class="d-flex justify-content-between align-items-center mt-auto">
-                            <small class="text-muted">@article.Author</small>
-                            <small class="text-muted">@article.PublishedAt.ToString("MMM d, yyyy")</small>
-                        </div>
-                    </div>
-                    <div class="card-footer bg-transparent border-0">
-                        <a href="/article/@article.Id" class="btn btn-sm btn-outline-primary">Read more</a>
-                    </div>
-                </div>
-            </div>
+            <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+                <RadzenCard style="height: 100%; display: flex; flex-direction: column;">
+                    <RadzenStack Gap="0.5rem" style="flex: 1;">
+                        <RadzenText TextStyle="TextStyle.H6" style="margin: 0;">
+                            <RadzenLink Path="@($"/article/{article.Id}")" Text="@article.Title" />
+                        </RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body2" style="color: var(--rz-base-600); margin: 0;">@article.Summary</RadzenText>
+                        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" Gap="0.5rem" style="margin-top: auto;">
+                            <RadzenText TextStyle="TextStyle.Caption" style="color: var(--rz-base-500);">Published By: @article.Author</RadzenText>
+                            <RadzenText TextStyle="TextStyle.Caption" style="color: var(--rz-base-500);">Published On: @article.PublishedAt.ToString("MMM d, yyyy")</RadzenText>
+                        </RadzenStack>
+                    </RadzenStack>
+                    <RadzenLink Path="@($"/article/{article.Id}")" Text="Read more" Icon="arrow_forward" style="margin-top: 1rem; display: inline-flex; align-items: center; gap: 0.5rem;" />
+                </RadzenCard>
+            </RadzenColumn>
         }
-    </div>
+    </RadzenRow>
 }

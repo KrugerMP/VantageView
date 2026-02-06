@@ -5,22 +5,50 @@ using VantageView.Admin.Portal.Services;
 
 namespace VantageView.Admin.Portal.Components.Pages;
 
+/// <summary>
+/// Admin page for managing (listing, editing, deleting) news articles.
+/// </summary>
 public partial class Articles
 {
+    /// <summary>
+    /// Gets or sets the HTTP client factory for API requests.
+    /// </summary>
     [Inject]
     private IHttpClientFactory HttpClientFactory { get; set; } = null!;
 
+    /// <summary>
+    /// Gets or sets the authentication service for auth state.
+    /// </summary>
     [Inject]
     private AuthService AuthService { get; set; } = null!;
 
+    /// <summary>
+    /// Gets or sets the navigation manager for redirects.
+    /// </summary>
     [Inject]
     private NavigationManager Navigation { get; set; } = null!;
 
+    /// <summary>
+    /// The list of articles fetched from the API.
+    /// </summary>
     private List<ArticleListItemDto> articles = [];
+
+    /// <summary>
+    /// The article selected for deletion confirmation, or null.
+    /// </summary>
     private ArticleListItemDto? articleToDelete;
+
+    /// <summary>
+    /// Whether articles are currently being loaded.
+    /// </summary>
     private bool loading = true;
+
+    /// <summary>
+    /// Error message to display if an operation fails.
+    /// </summary>
     private string? error;
 
+    /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
         if (AuthService.IsAuthenticated)
@@ -33,6 +61,9 @@ public partial class Articles
         }
     }
 
+    /// <summary>
+    /// Loads the list of articles from the API.
+    /// </summary>
     private async Task LoadArticles()
     {
         try
@@ -51,9 +82,20 @@ public partial class Articles
         }
     }
 
+    /// <summary>
+    /// Sets the article to delete and shows the confirmation modal.
+    /// </summary>
+    /// <param name="article">The article to delete.</param>
     private void ConfirmDelete(ArticleListItemDto article) => articleToDelete = article;
+
+    /// <summary>
+    /// Cancels the delete confirmation and clears the selection.
+    /// </summary>
     private void CancelDelete() => articleToDelete = null;
 
+    /// <summary>
+    /// Deletes the selected article via the API and reloads the list.
+    /// </summary>
     private async Task DoDelete()
     {
         if (articleToDelete is null) return;

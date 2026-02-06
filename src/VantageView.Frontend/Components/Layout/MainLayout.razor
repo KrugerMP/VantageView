@@ -1,20 +1,17 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
+<RadzenLayout>
+    <RadzenHeader>
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center" Gap="1.5rem" Style="width: 100%; padding: 0.75rem 1.5rem;">
+            <RadzenLink Path="/" Text="  VantageView" Icon="newspaper" Style="font-weight: 600; font-size: 1.25rem; text-decoration: none;" />
+        </RadzenStack>
+    </RadzenHeader>
+    <RadzenBody>
+        <article style="padding: 1rem;">
             @Body
         </article>
-    </main>
-</div>
+    </RadzenBody>
+</RadzenLayout>
 
 <div id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred.

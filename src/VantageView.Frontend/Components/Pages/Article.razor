@@ -5,30 +5,39 @@
 
 @if (loading)
 {
-    <p><em>Loading...</em></p>
+    <RadzenStack Orientation="Orientation.Horizontal" Gap="1rem" AlignItems="AlignItems.Center">
+        <RadzenProgressBarCircular ShowValue="false" Size="ProgressBarCircularSize.Small" />
+        <RadzenText>Loading...</RadzenText>
+    </RadzenStack>
 }
 else if (error is not null)
 {
-    <div class="alert alert-danger">@error</div>
-    <a href="/" class="btn btn-outline-secondary">Back to list</a>
+    <RadzenStack Gap="1rem">
+        <RadzenAlert AlertStyle="AlertStyle.Danger" ShowIcon="true" Title="Error" Variant="Variant.Flat">@error</RadzenAlert>
+        <RadzenLink Path="/" Icon="arrow_back" Text="Back to list" />
+    </RadzenStack>
 }
 else if (article is null)
 {
-    <div class="alert alert-warning">Article not found.</div>
-    <a href="/" class="btn btn-outline-secondary">Back to list</a>
+    <RadzenStack Gap="1rem">
+        <RadzenAlert AlertStyle="AlertStyle.Warning" ShowIcon="true" Title="Not found" Variant="Variant.Flat">Article not found.</RadzenAlert>
+        <RadzenLink Path="/" Icon="arrow_back" Text="Back to list" />
+    </RadzenStack>
 }
 else
 {
-    <article class="article-detail">
-        <a href="/" class="text-decoration-none mb-3 d-inline-block">&larr; Back to news</a>
-        <header class="mb-4">
-            <h1>@article.Title</h1>
-            <div class="text-muted small mb-3">
-                <span>@article.Author</span> &middot; <span>@article.PublishedAt.ToString("MMMM d, yyyy")</span>
-            </div>
-        </header>
-        <div class="article-content">
-            @((MarkupString)MarkdownToHtml(article.Content))
-        </div>
-    </article>
+    <RadzenStack Gap="1.5rem">
+        <RadzenLink Path="/" Icon="arrow_back" Text="Back to news" />
+        <RadzenCard>
+            <RadzenStack Gap="0.5rem">
+                <RadzenText TextStyle="TextStyle.H3" style="margin: 0;">@article.Title</RadzenText>
+                <RadzenText TextStyle="TextStyle.Body2" style="color: var(--rz-base-600); margin: 0;">
+                    @article.Author &middot; @article.PublishedAt.ToString("MMMM d, yyyy")
+                </RadzenText>
+                <div class="article-content" style="margin-top: 1rem;">
+                    @((MarkupString)MarkdownToHtml(article.Content))
+                </div>
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenStack>
 }
