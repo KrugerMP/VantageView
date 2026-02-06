@@ -1,6 +1,0 @@
-@VantageView.Auth_HostAddress = http://localhost:5098
-
-GET {{VantageView.Auth_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

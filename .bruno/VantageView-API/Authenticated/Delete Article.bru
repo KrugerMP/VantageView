@@ -1,14 +1,13 @@
 meta {
   name: Delete Article
   type: http
-  seq: 5
+  seq: 2
 }
 
 delete {
   url: http://localhost:5157/api/admin/articles/{{articleId}}
   body: none
   auth: bearer
-  bearer: {{authToken}}
 }
 
 settings {

@@ -1,14 +1,13 @@
 meta {
   name: Create Article
   type: http
-  seq: 3
+  seq: 2
 }
 
 post {
   url: http://localhost:5157/api/admin/articles
   body: json
   auth: bearer
-  bearer: {{authToken}}
 }
 
 body:json {

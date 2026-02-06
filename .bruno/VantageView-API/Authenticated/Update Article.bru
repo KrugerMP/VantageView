@@ -1,14 +1,13 @@
 meta {
   name: Update Article
   type: http
-  seq: 4
+  seq: 2
 }
 
 put {
   url: http://localhost:5157/api/admin/articles/{{articleId}}
   body: json
   auth: bearer
-  bearer: {{authToken}}
 }
 
 body:json {

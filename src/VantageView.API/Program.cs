@@ -54,8 +54,17 @@ using (IServiceScope scope = app.Services.CreateScope())
     {
         DateTime now = DateTime.UtcNow;
         db.Articles.AddRange(
-            new Article { Id = Guid.NewGuid(), Title = "Welcome to VantageView", Summary = "Your corporate news system is ready.", Content = "This is the first article. Edit or delete it from the Admin Portal.", Author = "System", PublishedAt = now, CreatedAt = now, UpdatedAt = now },
-            new Article { Id = Guid.NewGuid(), Title = "Getting Started", Summary = "Learn how to manage your news.", Content = "Use the Admin Portal to create, edit, and delete articles. Log in with admin/admin.", Author = "Admin", PublishedAt = now.AddDays(-1), CreatedAt = now, UpdatedAt = now });
+            new Article
+            {
+                Id = Guid.NewGuid(),
+                Title = "Welcome to VantageView",
+                Summary = "Your corporate news system is ready.",
+                Content = "This is the first article. Edit or delete it from the Admin Portal.",
+                Author = "System",
+                PublishedAt = now,
+                CreatedAt = now,
+                UpdatedAt = now
+            });
         db.SaveChanges();
     }
 }

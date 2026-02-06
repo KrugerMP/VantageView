@@ -1,7 +1,5 @@
 @page "/"
 @rendermode InteractiveServer
-@inject IHttpClientFactory HttpClientFactory
-@using VantageView.Frontend.Models
 
 <PageTitle>News Articles</PageTitle>
 
@@ -43,28 +41,4 @@ else
             </div>
         }
     </div>
-}
-
-@code {
-    private List<ArticleListItemDto> articles = [];
-    private bool loading = true;
-    private string? error;
-
-    protected override async Task OnInitializedAsync()
-    {
-        try
-        {
-            HttpClient client = HttpClientFactory.CreateClient("Api");
-            List<ArticleListItemDto>? result = await client.GetFromJsonAsync<List<ArticleListItemDto>>("api/articles");
-            articles = result ?? [];
-        }
-        catch (Exception ex)
-        {
-            error = $"Failed to load articles: {ex.Message}";
-        }
-        finally
-        {
-            loading = false;
-        }
-    }
 }
