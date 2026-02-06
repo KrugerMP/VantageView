@@ -5,17 +5,23 @@ meta {
 }
 
 put {
-  url: http://localhost:5157/api/admin/articles/{{articleId}}
+  url: http://localhost:5157/api/admin/articles/d169c024-89dc-4fa3-aa6f-fc483a265f41
   body: json
   auth: bearer
 }
 
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6ImFkbWluIiwicm9sZSI6IkFkbWluIiwibmJmIjoxNzcwNDA1NzIwLCJleHAiOjE3NzA0OTIxMjAsImlhdCI6MTc3MDQwNTcyMCwiaXNzIjoiVmFudGFnZVZpZXcuQXV0aCIsImF1ZCI6IlZhbnRhZ2VWaWV3LkFQSSJ9.-zlpfwyYb7k7TPkr9g_0jhXyWPK4sEaD2p0OZFkKx5w
+}
+
 body:json {
-  "title": "Updated Article",
-  "summary": "Updated brief summary.",
-  "content": "Updated full article content.",
-  "author": "Admin User",
-  "publishedAt": "2025-02-05T12:00:00Z"
+  {
+    "title": "Updated Article",
+    "summary": "Updated brief summary.",
+    "content": "Updated full article content.",
+    "author": "Admin User",
+    "publishedAt": "2025-02-05T12:00:00Z"
+  }
 }
 
 settings {

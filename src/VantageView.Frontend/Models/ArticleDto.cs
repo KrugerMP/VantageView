@@ -15,7 +15,8 @@ public record ArticleDto(
     string Summary,
     string Content,
     string Author,
-    DateTime PublishedAt);
+    DateTime PublishedAt,
+    DateTime UpdatedAt);
 
 /// <summary>
 /// Abbreviated article data for list views.

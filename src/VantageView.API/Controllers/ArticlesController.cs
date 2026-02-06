@@ -41,7 +41,7 @@ public class ArticlesController : ControllerBase
         {
             List<ArticleListItemDto> articles = await _db.Articles
                 .OrderByDescending(a => a.PublishedAt)
-                .Select(a => new ArticleListItemDto(a.Id, a.Title, a.Summary, a.Author, a.PublishedAt))
+                .Select(a => new ArticleListItemDto(a.Id, a.Title, a.Summary, a.Author, a.PublishedAt, a.UpdatedAt))
                 .ToListAsync(ct);
 
             return Ok(articles);
@@ -49,7 +49,7 @@ public class ArticlesController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error fetching articles.");
-            throw;
+            return BadRequest();
         }
     }
 
@@ -59,7 +59,7 @@ public class ArticlesController : ControllerBase
     /// <param name="id">The article ID.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The article if found; otherwise 404.</returns>
-    [HttpGet("{id:guid}")]
+    [HttpGet("{id:guid}", Name = "GetArticle")]
     [ProducesResponseType(typeof(ArticleDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ArticleDto>> GetArticleAsync(Guid id, CancellationToken ct)
@@ -72,12 +72,12 @@ public class ArticlesController : ControllerBase
                 return NotFound();
             }
 
-            return Ok(new ArticleDto(article.Id, article.Title, article.Summary, article.Content, article.Author, article.PublishedAt));
+            return Ok(new ArticleDto(article.Id, article.Title, article.Summary, article.Content, article.Author, article.PublishedAt, article.UpdatedAt));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error fetching article {ArticleId}.", id);
-            throw;
+            return BadRequest();
         }
     }
 }

@@ -58,13 +58,13 @@ public class AdminArticlesController : ControllerBase
             _db.Articles.Add(article);
             await _db.SaveChangesAsync(ct);
 
-            ArticleDto result = new(article.Id, article.Title, article.Summary, article.Content, article.Author, article.PublishedAt);
-            return CreatedAtAction(nameof(ArticlesController.GetArticleAsync), "Articles", new { id = article.Id }, result);
+            ArticleDto result = new(article.Id, article.Title, article.Summary, article.Content, article.Author, article.PublishedAt, article.UpdatedAt);
+            return CreatedAtRoute("GetArticle", new { id = article.Id }, result);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating article.");
-            throw;
+            return BadRequest();
         }
     }
 
@@ -91,18 +91,17 @@ public class AdminArticlesController : ControllerBase
             article.Title = dto.Title;
             article.Summary = dto.Summary;
             article.Content = dto.Content;
-            article.Author = dto.Author;
-            article.PublishedAt = dto.PublishedAt ?? article.PublishedAt;
+
             article.UpdatedAt = DateTime.UtcNow;
 
             await _db.SaveChangesAsync(ct);
 
-            return Ok(new ArticleDto(article.Id, article.Title, article.Summary, article.Content, article.Author, article.PublishedAt));
+            return Ok(new ArticleDto(article.Id, article.Title, article.Summary, article.Content, article.Author, article.PublishedAt, article.UpdatedAt));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating article {ArticleId}.", id);
-            throw;
+            return BadRequest();
         }
     }
 
@@ -133,7 +132,7 @@ public class AdminArticlesController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting article {ArticleId}.", id);
-            throw;
+            return BadRequest();
         }
     }
 }

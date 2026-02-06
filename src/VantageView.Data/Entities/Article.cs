@@ -43,5 +43,5 @@ public class Article
     /// <summary>
     /// Gets or sets the last update timestamp.
     /// </summary>
-    public DateTime UpdatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }

@@ -5,9 +5,13 @@ meta {
 }
 
 delete {
-  url: http://localhost:5157/api/admin/articles/{{articleId}}
+  url: http://localhost:5157/api/admin/articles/a3963006-ffec-461d-bab3-fde094588567
   body: none
   auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6ImFkbWluIiwicm9sZSI6IkFkbWluIiwibmJmIjoxNzcwNDA1NzIwLCJleHAiOjE3NzA0OTIxMjAsImlhdCI6MTc3MDQwNTcyMCwiaXNzIjoiVmFudGFnZVZpZXcuQXV0aCIsImF1ZCI6IlZhbnRhZ2VWaWV3LkFQSSJ9.-zlpfwyYb7k7TPkr9g_0jhXyWPK4sEaD2p0OZFkKx5w
 }
 
 settings {

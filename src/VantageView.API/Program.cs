@@ -22,7 +22,19 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key not configured")))
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key not configured"))),
+            ClockSkew = TimeSpan.FromMinutes(5)
+        };
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = context =>
+            {
+                ILogger<JwtBearerOptions>? logger = context.HttpContext.RequestServices.GetService<ILogger<JwtBearerOptions>>();
+                logger?.LogWarning(context.Exception, "JWT authentication failed: {Message}", context.Exception.Message);
+                if (context.Exception is SecurityTokenExpiredException)
+                    context.Response.Headers.Append("X-Token-Expired", "true");
+                return Task.CompletedTask;
+            }
         };
     });
 

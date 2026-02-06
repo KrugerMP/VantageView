@@ -5,11 +5,19 @@ meta {
 }
 
 post {
-  url: https://localhsot:5098/api/auth/login
-  body: none
+  url: http://localhost:5098/api/auth/login
+  body: json
   auth: inherit
+}
+
+body:json {
+  {
+    "Username": "admin",
+    "Password": "admin"
+  }
 }
 
 settings {
   encodeUrl: true
+  timeout: 0
 }

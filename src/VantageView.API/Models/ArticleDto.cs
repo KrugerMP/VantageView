@@ -15,7 +15,8 @@ public record ArticleDto(
     string Summary,
     string Content,
     string Author,
-    DateTime PublishedAt);
+    DateTime PublishedAt,
+    DateTime UpdatedAt);
 
 /// <summary>
 /// Abbreviated article data for list views.
@@ -30,7 +31,8 @@ public record ArticleListItemDto(
     string Title,
     string Summary,
     string Author,
-    DateTime PublishedAt);
+    DateTime PublishedAt,
+    DateTime UpdatedAt);
 
 /// <summary>
 /// Data transfer object for creating a new article.
@@ -58,6 +60,4 @@ public record CreateArticleDto(
 public record UpdateArticleDto(
     string Title,
     string Summary,
-    string Content,
-    string Author,
-    DateTime? PublishedAt);
+    string Content);

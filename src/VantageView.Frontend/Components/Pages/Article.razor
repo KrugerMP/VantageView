@@ -32,10 +32,15 @@ else
             <RadzenStack Gap="0.5rem">
                 <RadzenText TextStyle="TextStyle.H3" style="margin: 0;">@article.Title</RadzenText>
                 <RadzenText TextStyle="TextStyle.Body2" style="color: var(--rz-base-600); margin: 0;">
-                    @article.Author &middot; @article.PublishedAt.ToString("MMMM d, yyyy")
+                    Published by:@article.Author &middot; Published at: @article.PublishedAt.ToString("MMMM d, yyyy")
                 </RadzenText>
                 <div class="article-content" style="margin-top: 1rem;">
                     @((MarkupString)MarkdownToHtml(article.Content))
+                </div>
+                <div style="text-align: right; margin-top: 1rem;">
+                    <RadzenText TextStyle="TextStyle.Body2" style="color: var(--rz-base-600); margin: 0;">
+                        Updated at: @article.UpdatedAt.ToString("MMMM dd, yyyy HH:mm") UTC
+                    </RadzenText>
                 </div>
             </RadzenStack>
         </RadzenCard>

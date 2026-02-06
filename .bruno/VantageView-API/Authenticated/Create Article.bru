@@ -10,12 +10,18 @@ post {
   auth: bearer
 }
 
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6ImFkbWluIiwicm9sZSI6IkFkbWluIiwibmJmIjoxNzcwNDA1NzIwLCJleHAiOjE3NzA0OTIxMjAsImlhdCI6MTc3MDQwNTcyMCwiaXNzIjoiVmFudGFnZVZpZXcuQXV0aCIsImF1ZCI6IlZhbnRhZ2VWaWV3LkFQSSJ9.-zlpfwyYb7k7TPkr9g_0jhXyWPK4sEaD2p0OZFkKx5w
+}
+
 body:json {
-  "title": "New Article",
-  "summary": "A brief summary of the article.",
-  "content": "Full article content goes here.",
-  "author": "Admin User",
-  "publishedAt": null
+  {
+    "title": "New Article",
+    "summary": "A brief summary of the article.",
+    "content": "Full article content goes here.",
+    "author": "Admin User",
+    "publishedAt": null
+  }
 }
 
 settings {
