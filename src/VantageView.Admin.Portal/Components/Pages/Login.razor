@@ -1,5 +1,4 @@
 @page "/login"
-@rendermode InteractiveServer
 
 <PageTitle>Admin Login</PageTitle>
 
@@ -8,23 +7,25 @@
         <div class="card shadow">
             <div class="card-body">
                 <h4 class="card-title mb-4">Admin Portal</h4>
-                <EditForm Model="request" OnValidSubmit="HandleLoginAsync">
-                    <DataAnnotationsValidator />
-                    <ValidationSummary class="text-danger mb-3" />
-                    <div class="mb-3">
-                        <label class="form-label">Username</label>
-                        <InputText @bind-Value="request.Username" class="form-control" placeholder="admin" />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Password</label>
-                        <InputText @bind-Value="request.Password" type="password" class="form-control" placeholder="admin" />
-                    </div>
-                    @if (error is not null)
+                <form method="post" action="/account/login">
+                    @if (AntiforgeryRequestToken is not null)
                     {
-                        <div class="alert alert-danger">@error</div>
+                        <input type="hidden" name="__RequestVerificationToken" value="@AntiforgeryRequestToken" />
                     }
-                    <button type="submit" class="btn btn-primary w-100" disabled="@loading">@(loading ? "Signing in..." : "Sign in")</button>
-                </EditForm>
+                    <div class="mb-3">
+                        <label class="form-label" for="Username">Username</label>
+                        <input type="text" id="Username" name="Username" class="form-control" placeholder="admin" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="Password">Password</label>
+                        <input type="password" id="Password" name="Password" class="form-control" placeholder="admin" required />
+                    </div>
+                    @if (ErrorMessage is not null)
+                    {
+                        <div class="alert alert-danger">@ErrorMessage</div>
+                    }
+                    <button type="submit" class="btn btn-primary w-100">Sign in</button>
+                </form>
                 <p class="text-muted small mt-3 mb-0">Demo: admin / admin</p>
             </div>
         </div>

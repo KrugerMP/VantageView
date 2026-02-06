@@ -1,8 +1,13 @@
+using System.Net.Http.Json;
+using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using VantageView.Admin.Portal.Components;
+using VantageView.Admin.Portal.Models;
 using VantageView.Admin.Portal.Services;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -79,9 +84,77 @@ if (!app.Environment.IsDevelopment())
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.UseAntiforgery();
 
 app.MapStaticAssets();
+
+// Cookie sign-in must run in a real HTTP request. This endpoint handles form POST from the login page.
+app.MapPost("/account/login", async (
+    HttpContext context,
+    IFormCollection form,
+    IHttpClientFactory httpClientFactory,
+    IAntiforgery antiforgery,
+    ILogger<Program> logger) =>
+{
+    if (!await antiforgery.IsRequestValidAsync(context))
+    {
+        return Results.BadRequest();
+    }
+
+    string? username = form["Username"];
+    string? password = form["Password"];
+    if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+    {
+        return Results.Redirect("/login?error=invalid");
+    }
+
+    try
+    {
+        HttpClient client = httpClientFactory.CreateClient("Auth");
+        using HttpResponseMessage response = await client.PostAsJsonAsync("api/auth/login", new { Username = username, Password = password });
+        if (!response.IsSuccessStatusCode)
+        {
+            logger.LogWarning("Login failed. Invalid username or password.");
+            return Results.Redirect("/login?error=invalid");
+        }
+
+        LoginResponse? loginResponse = await response.Content.ReadFromJsonAsync<LoginResponse>();
+        if (string.IsNullOrEmpty(loginResponse?.Token))
+        {
+            logger.LogWarning("Auth API returned no token.");
+            return Results.Redirect("/login?error=failed");
+        }
+
+        List<Claim> claims =
+        [
+            new Claim("username", username),
+            new Claim("access_token", loginResponse.Token)
+        ];
+        ClaimsIdentity identity = new(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        ClaimsPrincipal principal = new(identity);
+
+        await context.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            principal,
+            new AuthenticationProperties
+            {
+                IsPersistent = false,
+                ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
+            });
+        
+        logger.LogInformation("Login successful. Redirecting to articles page.");
+        return Results.Redirect("/articles");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Login failed. Ensure the Auth service is running.");
+        return Results.Redirect("/login?error=failed");
+    }
+});
+
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 

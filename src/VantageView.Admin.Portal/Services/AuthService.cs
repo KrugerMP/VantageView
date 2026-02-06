@@ -1,28 +1,49 @@
+using System.Security.Claims;
+
 namespace VantageView.Admin.Portal.Services;
 
 /// <summary>
-/// Scoped service that holds the current user's JWT token for API requests.
+/// Scoped service that provides auth state and JWT from the current cookie (HttpContext).
 /// </summary>
 public class AuthService
 {
-    /// <summary>
-    /// Gets the current JWT bearer token, or <c>null</c> if not authenticated.
-    /// </summary>
-    public string? Token { get; private set; }
+    private const string AccessTokenClaimType = "access_token";
+    private const string UsernameClaimType = "username";
+
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     /// <summary>
-    /// Gets a value indicating whether the user is authenticated.
+    /// Initializes a new instance of the <see cref="AuthService"/> class.
     /// </summary>
-    public bool IsAuthenticated => !string.IsNullOrEmpty(Token);
+    /// <param name="httpContextAccessor">Accessor for the current HTTP context.</param>
+    public AuthService(IHttpContextAccessor httpContextAccessor)
+    {
+        _httpContextAccessor = httpContextAccessor;
+    }
 
     /// <summary>
-    /// Stores the JWT token after successful login.
+    /// Gets the current JWT bearer token from the signed-in user's claims, or <c>null</c> if not authenticated.
     /// </summary>
-    /// <param name="token">The JWT bearer token.</param>
-    public void SetToken(string token) => Token = token;
+    public string? Token =>
+        _httpContextAccessor.HttpContext?.User?.FindFirstValue(AccessTokenClaimType);
 
     /// <summary>
-    /// Clears the stored token on logout.
+    /// Gets the current username from the signed-in user's claims, or <c>null</c> if not authenticated.
     /// </summary>
-    public void ClearToken() => Token = null;
+    public string? UserName =>
+        _httpContextAccessor.HttpContext?.User?.FindFirstValue(UsernameClaimType);
+
+    /// <summary>
+    /// Gets a value indicating whether the user is authenticated (signed in via cookie).
+    /// </summary>
+    public bool IsAuthenticated =>
+        _httpContextAccessor.HttpContext?.User?.Identity?.IsAuthenticated ?? false;
+
+    /// <summary>
+    /// Clears the stored token on logout. No-op when using cookie auth; sign out clears the cookie.
+    /// </summary>
+    public void ClearToken()
+    {
+        // Cookie sign-out is done via IHttpContextAccessor.HttpContext.SignOutAsync.
+    }
 }

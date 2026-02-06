@@ -14,15 +14,15 @@
     <a href="/articles/new" class="btn btn-primary">New Article</a>
 </div>
 
-@if (loading)
+@if (Loading)
 {
     <p><em>Loading...</em></p>
 }
-else if (error is not null)
+else if (Error is not null)
 {
-    <div class="alert alert-danger">@error</div>
+    <div class="alert alert-danger">@Error</div>
 }
-else if (articles.Count == 0)
+else if (ArticleList.Count == 0)
 {
     <div class="alert alert-info">No articles yet. <a href="/articles/new">Create one</a>.</div>
 }
@@ -39,7 +39,7 @@ else
                 </tr>
             </thead>
             <tbody>
-                @foreach (ArticleListItemDto article in articles)
+                @foreach (ArticleListItemDto article in ArticleList)
                 {
                     <tr>
                         <td>@article.Title</td>
@@ -56,7 +56,7 @@ else
     </div>
 }
 
-@if (articleToDelete is not null)
+@if (ArticleToDelete is not null)
 {
     <div class="modal show d-block" tabindex="-1">
         <div class="modal-dialog">
@@ -66,11 +66,11 @@ else
                     <button type="button" class="btn-close" @onclick="CancelDelete"></button>
                 </div>
                 <div class="modal-body">
-                    Delete "@articleToDelete.Title"?
+                    Delete "@ArticleToDelete.Title"?
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" @onclick="CancelDelete">Cancel</button>
-                    <button type="button" class="btn btn-danger" @onclick="DoDelete">Delete</button>
+                    <button type="button" class="btn btn-danger" @onclick="DoDeleteAsync">Delete</button>
                 </div>
             </div>
         </div>
