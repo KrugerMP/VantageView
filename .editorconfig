@@ -341,6 +341,13 @@ dotnet_naming_rule.private_fields_must_begin_with_underscore_and_be_in_camel_cas
 dotnet_naming_rule.private_fields_must_begin_with_underscore_and_be_in_camel_case.style = require_underscore_prefix_and_camel_case
 dotnet_naming_rule.private_fields_must_begin_with_underscore_and_be_in_camel_case.severity = warning
 
+# Allow private instance fields (non-readonly) to use camelCase without underscore prefix
+dotnet_naming_symbols.private_instance_fields.applicable_kinds = field
+dotnet_naming_symbols.private_instance_fields.applicable_accessibilities = private
+dotnet_naming_rule.private_instance_fields_may_use_camel_case.symbols = private_instance_fields
+dotnet_naming_rule.private_instance_fields_may_use_camel_case.style = camel_case
+dotnet_naming_rule.private_instance_fields_may_use_camel_case.severity = suggestion
+
 # Constants (const fields) may use PascalCase (uppercase start)
 dotnet_naming_symbols.const_fields.applicable_kinds = field
 dotnet_naming_symbols.const_fields.applicable_accessibilities = public, internal, private, protected, protected_internal, private_protected

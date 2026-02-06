@@ -35,6 +35,12 @@ public partial class ArticleEdit
     private NavigationManager Navigation { get; set; } = null!;
 
     /// <summary>
+    /// Gets or sets the logger for this component.
+    /// </summary>
+    [Inject]
+    private ILogger<ArticleEdit> Logger { get; set; } = null!;
+    
+    /// <summary>
     /// Gets a value indicating whether this is a new article (create) vs edit.
     /// </summary>
     private bool IsNew => Id == Guid.Empty;
@@ -47,7 +53,7 @@ public partial class ArticleEdit
     /// <summary>
     /// The selected publish date for the article.
     /// </summary>
-    private DateTime publishDate = DateTime.Today;
+    private DateTime _publishDate = DateTime.Today;
 
     /// <summary>
     /// Whether a save operation is in progress.
@@ -62,26 +68,31 @@ public partial class ArticleEdit
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
-        if (!AuthService.IsAuthenticated) return;
+        if (!AuthService.IsAuthenticated)
+        {
+            return;
+        }
+
         if (!IsNew)
         {
-            await LoadArticle();
+            await LoadArticleAsync();
         }
         else
         {
-            publishDate = DateTime.Today;
+            _publishDate = DateTime.Today;
         }
     }
 
     /// <summary>
     /// Loads the existing article data for edit mode.
     /// </summary>
-    private async Task LoadArticle()
+    private async Task LoadArticleAsync()
     {
         try
         {
             HttpClient client = HttpClientFactory.CreateClient("Api");
             ArticleDto? article = await client.GetFromJsonAsync<ArticleDto>($"api/articles/{Id}");
+
             if (article is not null)
             {
                 model = new CreateArticleDto
@@ -92,30 +103,33 @@ public partial class ArticleEdit
                     Author = article.Author,
                     PublishedAt = article.PublishedAt
                 };
-                publishDate = article.PublishedAt.Date;
+                _publishDate = article.PublishedAt.Date;
             }
         }
         catch (Exception ex)
         {
-            error = ex.Message;
+            Logger.LogError(ex, "Could not load article");
+            error = "Article could not be loaded";
         }
     }
 
     /// <summary>
     /// Handles form submission to create or update the article.
     /// </summary>
-    private async Task HandleSave()
+    private async Task HandleSaveAsync()
     {
         loading = true;
         error = null;
+
         try
         {
             HttpClient client = HttpClientFactory.CreateClient("Api");
-            model.PublishedAt = publishDate;
+            model.PublishedAt = _publishDate;
 
             if (IsNew)
             {
                 HttpResponseMessage response = await client.PostAsJsonAsync("api/admin/articles", model);
+
                 if (response.IsSuccessStatusCode)
                 {
                     Navigation.NavigateTo("/articles", forceLoad: true);
@@ -127,13 +141,13 @@ public partial class ArticleEdit
             }
             else
             {
-                UpdateArticleDto updateDto = new UpdateArticleDto
+                UpdateArticleDto updateDto = new()
                 {
                     Title = model.Title,
                     Summary = model.Summary,
                     Content = model.Content,
                     Author = model.Author,
-                    PublishedAt = publishDate
+                    PublishedAt = _publishDate
                 };
                 HttpResponseMessage response = await client.PutAsJsonAsync($"api/admin/articles/{Id}", updateDto);
                 if (response.IsSuccessStatusCode)
@@ -148,7 +162,8 @@ public partial class ArticleEdit
         }
         catch (Exception ex)
         {
-            error = ex.Message;
+            Logger.LogError(ex, "Error occurred when saving changes to the article");
+             error = "Could not save changes to the article.";
         }
         finally
         {

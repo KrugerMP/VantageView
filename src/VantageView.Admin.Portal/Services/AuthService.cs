@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
 
 namespace VantageView.Admin.Portal.Services;
 
@@ -38,12 +39,4 @@ public class AuthService
     /// </summary>
     public bool IsAuthenticated =>
         _httpContextAccessor.HttpContext?.User?.Identity?.IsAuthenticated ?? false;
-
-    /// <summary>
-    /// Clears the stored token on logout. No-op when using cookie auth; sign out clears the cookie.
-    /// </summary>
-    public void ClearToken()
-    {
-        // Cookie sign-out is done via IHttpContextAccessor.HttpContext.SignOutAsync.
-    }
 }
