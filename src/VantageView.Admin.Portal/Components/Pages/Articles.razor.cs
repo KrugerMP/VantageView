@@ -53,7 +53,7 @@ public partial class Articles
     {
         if (AuthService.IsAuthenticated)
         {
-            await LoadArticles();
+            await LoadArticlesAsync();
         }
         else
         {
@@ -64,7 +64,7 @@ public partial class Articles
     /// <summary>
     /// Loads the list of articles from the API.
     /// </summary>
-    private async Task LoadArticles()
+    private async Task LoadArticlesAsync()
     {
         try
         {
@@ -106,7 +106,7 @@ public partial class Articles
             if (response.IsSuccessStatusCode)
             {
                 articleToDelete = null;
-                await LoadArticles();
+                await LoadArticlesAsync();
             }
             else
             {

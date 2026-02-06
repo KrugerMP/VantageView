@@ -70,6 +70,8 @@ public class AuthController : ControllerBase
         SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
         string tokenString = tokenHandler.WriteToken(token);
 
+        _logger.LogInformation($"User:[{request.Username}] logged in at {DateTime.UtcNow}");
+
         return Ok(new LoginResponse(tokenString));
     }
 }
