@@ -70,9 +70,20 @@ dotnet ef database update --project VantageView.Data --startup-project VantageVi
 
 Use the **`http`** launch profile for all projects to avoid port conflicts and SSL setup.
 
+**macOS / Linux:** Ensure the script is executable, then run:
+
 ```bash
+chmod +x scripts/run-all.sh
 ./scripts/run-all.sh
 ```
+
+**Windows (PowerShell):**
+
+```powershell
+.\scripts\run-all.ps1
+```
+
+> If you get an execution policy error, run: `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned`
 
 This starts:
 
