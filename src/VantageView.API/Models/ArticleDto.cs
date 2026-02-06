@@ -9,6 +9,7 @@ namespace VantageView.API.Models;
 /// <param name="Content">The full content.</param>
 /// <param name="Author">The author name.</param>
 /// <param name="PublishedAt">The publication date.</param>
+/// <param name="UpdatedAt">The last update timestamp.</param>
 public record ArticleDto(
     Guid Id,
     string Title,
@@ -26,6 +27,7 @@ public record ArticleDto(
 /// <param name="Summary">The brief summary.</param>
 /// <param name="Author">The author name.</param>
 /// <param name="PublishedAt">The publication date.</param>
+/// <param name="UpdatedAt">The last update timestamp.</param>
 public record ArticleListItemDto(
     Guid Id,
     string Title,
@@ -55,8 +57,6 @@ public record CreateArticleDto(
 /// <param name="Title">The article title.</param>
 /// <param name="Summary">The brief summary.</param>
 /// <param name="Content">The full content.</param>
-/// <param name="Author">The author name.</param>
-/// <param name="PublishedAt">The publication date (optional).</param>
 public record UpdateArticleDto(
     string Title,
     string Summary,

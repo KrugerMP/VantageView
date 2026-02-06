@@ -9,6 +9,7 @@ namespace VantageView.Frontend.Models;
 /// <param name="Content">The full content.</param>
 /// <param name="Author">The author name.</param>
 /// <param name="PublishedAt">The publication date.</param>
+/// <param name="UpdatedAt">The last update timestamp.</param>
 public record ArticleDto(
     Guid Id,
     string Title,
