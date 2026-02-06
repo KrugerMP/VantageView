@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -37,41 +38,49 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public IActionResult Login([FromBody] LoginRequest request)
+    public IActionResult Login([FromBody, Required] LoginRequest request)
     {
-        // Simplified auth for demo: accept admin/admin
-        if (request.Username != "admin" || request.Password != "admin")
+        try
         {
-            _logger.LogWarning("Failed login attempt for user {Username}", request.Username);
-            return Unauthorized();
-        }
-
-        string key = _configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key not configured");
-        string issuer = _configuration["Jwt:Issuer"] ?? "VantageView.Auth";
-        string audience = _configuration["Jwt:Audience"] ?? "VantageView.API";
-
-        JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-        byte[] tokenKey = Encoding.UTF8.GetBytes(key);
-        SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
-        {
-            Subject = new ClaimsIdentity(new[]
+            // Simplified auth for demo: accept admin/admin
+            if (request.Username != "admin" || request.Password != "admin")
             {
-                new Claim(ClaimTypes.Name, request.Username),
-                new Claim(ClaimTypes.Role, "Admin")
-            }),
-            Expires = DateTime.UtcNow.AddHours(24),
-            Issuer = issuer,
-            Audience = audience,
-            SigningCredentials = new SigningCredentials(
-                new SymmetricSecurityKey(tokenKey),
-                SecurityAlgorithms.HmacSha256Signature)
-        };
+                _logger.LogWarning("Failed login attempt for user {Username}", request.Username);
+                return Unauthorized();
+            }
 
-        SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
-        string tokenString = tokenHandler.WriteToken(token);
+            string key = _configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key not configured");
+            string issuer = _configuration["Jwt:Issuer"] ?? "VantageView.Auth";
+            string audience = _configuration["Jwt:Audience"] ?? "VantageView.API";
 
-        _logger.LogInformation($"User:[{request.Username}] logged in at {DateTime.UtcNow}");
+            JwtSecurityTokenHandler tokenHandler = new();
+            byte[] tokenKey = Encoding.UTF8.GetBytes(key);
+            SecurityTokenDescriptor tokenDescriptor = new()
+            {
+                Subject = new ClaimsIdentity(
+                [
+                    new Claim(ClaimTypes.Name, request.Username),
+                    new Claim(ClaimTypes.Role, "Admin")
+                ]),
+                Expires = DateTime.UtcNow.AddHours(24),
+                Issuer = issuer,
+                Audience = audience,
+                SigningCredentials = new SigningCredentials(
+                    new SymmetricSecurityKey(tokenKey),
+                    SecurityAlgorithms.HmacSha256Signature)
+            };
 
-        return Ok(new LoginResponse(tokenString));
+            SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
+            string tokenString = tokenHandler.WriteToken(token);
+
+            _logger.LogInformation($"User:[{request.Username}] logged in at {DateTime.UtcNow}");
+
+            return Ok(new LoginResponse(tokenString));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred during login for user {Username}", request.Username);
+            return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+        }
     }
 }

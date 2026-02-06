@@ -1,4 +1,3 @@
-using System.Net.Http.Json;
 using Microsoft.AspNetCore.Components;
 using VantageView.Frontend.Models;
 
@@ -14,6 +13,12 @@ public partial class Home
     /// </summary>
     [Inject]
     private IHttpClientFactory HttpClientFactory { get; set; } = null!;
+
+    /// <summary>
+    /// Injects the logging service for audit trails.
+    /// </summary>
+    [Inject]
+    private Logger<Home> Logger { get; set; } = null!;
 
     /// <summary>
     /// The list of articles fetched from the API.
@@ -41,7 +46,8 @@ public partial class Home
         }
         catch (Exception ex)
         {
-            error = $"Failed to load articles: {ex.Message}";
+            Logger.LogError(ex, $"Could not load all articles at {DateTime.UtcNow}");
+            error = "Failed to load articles";
         }
         finally
         {

@@ -22,10 +22,10 @@ public partial class Article
     private IHttpClientFactory HttpClientFactory { get; set; } = null!;
 
     /// <summary>
-    /// Gets or sets the navigation manager for redirects.
+    /// Injects the logging service for audit trails
     /// </summary>
     [Inject]
-    private NavigationManager Navigation { get; set; } = null!;
+    private ILogger<Article> Logger { get; set; } = null!;
 
     /// <summary>
     /// The loaded article data, or null if not found or not yet loaded.
@@ -64,7 +64,8 @@ public partial class Article
         }
         catch (Exception ex)
         {
-            error = $"Failed to load article: {ex.Message}";
+            Logger.LogError(ex, $"Error occurred when loading article:[{Id}] at {DateTime.UtcNow}");
+            error = "Failed to load article";
         }
         finally
         {
