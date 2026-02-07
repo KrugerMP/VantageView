@@ -94,6 +94,12 @@ chmod +x scripts/run-all.sh
 
 > If you get an execution policy error, run: `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned`
 
+**docker containers:** Run the docker compose command, you can also run each container on their own if needed.
+
+```bash
+docker compose up --build
+```
+
 This starts:
 
 | Application   | URL                      | Port |
