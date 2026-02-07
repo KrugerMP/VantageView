@@ -29,13 +29,13 @@ public class HealthControllerTests
     /// Verifies that the articles health endpoint returns 400 when the service is unhealthy (no articles).
     /// </summary>
     [TestMethod]
-    public async Task HealthController_GetArticlesServiceHealthAsync_Negative_Test()
+    public async Task HealthController_GetArticlesServiceHealthAsync_Negative_TestAsync()
     {
         // Arrange
         ResetMocks();
 
-        HealthController healthController = new HealthController(_healthMock.Object, _loggerMock.Object);
-        CancellationTokenSource cts = new CancellationTokenSource();
+        HealthController healthController = new(_healthMock.Object, _loggerMock.Object);
+        CancellationTokenSource cts = new();
 
         // Act
         ObjectResult? result = await healthController.GetArticlesServiceHealthAsync(cts.Token) as ObjectResult;
@@ -55,15 +55,15 @@ public class HealthControllerTests
     /// Verifies that the articles health endpoint returns 200 when the service is healthy.
     /// </summary>
     [TestMethod]
-    public async Task HealthController_GetArticlesServiceHealthAsync_Positive_Test()
+    public async Task HealthController_GetArticlesServiceHealthAsync_Positive_TestAsync()
     {
         // Arrange
         ResetMocks();
 
         _healthMock.Setup(x => x.IsHealthyAsync(It.IsAny<CancellationToken>())).Returns(Task.FromResult(true));
 
-        HealthController healthController = new HealthController(_healthMock.Object, _loggerMock.Object);
-        CancellationTokenSource cts = new CancellationTokenSource();
+        HealthController healthController = new(_healthMock.Object, _loggerMock.Object);
+        CancellationTokenSource cts = new();
 
         // Act
         ObjectResult? result = await healthController.GetArticlesServiceHealthAsync(cts.Token) as ObjectResult;
@@ -83,7 +83,7 @@ public class HealthControllerTests
     /// Verifies that the articles health endpoint returns 400 when the health query throws an exception.
     /// </summary>
     [TestMethod]
-    public async Task HealthController_GetArticlesServiceHealthAsync_Exception_Test()
+    public async Task HealthController_GetArticlesServiceHealthAsync_Exception_TestAsync()
     {
         // Arrange
         ResetMocks();
@@ -91,8 +91,8 @@ public class HealthControllerTests
         _healthMock.Setup(x => x.IsHealthyAsync(It.IsAny<CancellationToken>()))
             .Throws(new Exception("This is unit testing"));
 
-        HealthController healthController = new HealthController(_healthMock.Object, _loggerMock.Object);
-        CancellationTokenSource cts = new CancellationTokenSource();
+        HealthController healthController = new(_healthMock.Object, _loggerMock.Object);
+        CancellationTokenSource cts = new();
 
         // Act
         ObjectResult? result = await healthController.GetArticlesServiceHealthAsync(cts.Token) as ObjectResult;
