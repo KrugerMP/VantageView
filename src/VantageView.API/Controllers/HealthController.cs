@@ -58,7 +58,7 @@ public class HealthController : ControllerBase
                 Result = new HealthDto { IsHealthy = true, Message = "Articles service is healthy" },
                 ResponseTime = DateTime.UtcNow,
                 Message = "Successfully processed health request",
-                Error = new ErrorResponseModel { Message = string.Empty }
+                Error = null!
             });
         }
         catch (Exception ex)

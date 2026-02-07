@@ -36,8 +36,9 @@ public class AuthController : ControllerBase
     /// <param name="request">Login credentials (simplified demo: admin/admin).</param>
     /// <returns>200 OK with JWT token on success; 401 Unauthorized on invalid credentials.</returns>
     [HttpPost("login")]
-    [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(BaseResponseModel<LoginResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public IActionResult Login([FromBody, Required] LoginRequest request)
     {
         try
@@ -46,7 +47,13 @@ public class AuthController : ControllerBase
             if (request.Username != "admin" || request.Password != "admin")
             {
                 _logger.LogWarning("Failed login attempt for user {Username}", request.Username);
-                return Unauthorized();
+                return Unauthorized(new BaseResponseModel<LoginResponse>
+                {
+                    Message = "Invalid credentials.",
+                    ResponseTime = DateTime.UtcNow,
+                    Error = new ErrorResponseModel { Message = "Invalid credentials." },
+                    Result = null!
+                });
             }
 
             string key = _configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key not configured");
@@ -73,14 +80,25 @@ public class AuthController : ControllerBase
             SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
             string tokenString = tokenHandler.WriteToken(token);
 
-            _logger.LogInformation($"User:[{request.Username}] logged in at {DateTime.UtcNow}");
+            _logger.LogInformation("User [{Username}] logged in at {Time}", request.Username, DateTime.UtcNow);
 
-            return Ok(new LoginResponse(tokenString));
+            return Ok(new BaseResponseModel<LoginResponse>
+            {
+                Result = new LoginResponse(tokenString),
+                Message = "Login successful.",
+                ResponseTime = DateTime.UtcNow
+            });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error occurred during login for user {Username}", request.Username);
-            return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+            return StatusCode(StatusCodes.Status500InternalServerError, new BaseResponseModel<LoginResponse>
+            {
+                Message = "An error occurred while processing your request.",
+                ResponseTime = DateTime.UtcNow,
+                Error = new ErrorResponseModel { Message = "An error occurred while processing your request." },
+                Result = null!
+            });
         }
     }
 }
