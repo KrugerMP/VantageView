@@ -44,7 +44,7 @@ public class AdminArticlesController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(BaseResponseModel<ArticleDto>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<BaseResponseModel<ArticleDto>>> CreateArticleAsync([FromBody, Required] CreateArticleDto dto,
+    public async Task<IActionResult> CreateArticleAsync([FromBody, Required] CreateArticleDto dto,
         CancellationToken ct)
     {
         try
@@ -109,7 +109,7 @@ public class AdminArticlesController : ControllerBase
     [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(BaseResponseModel<ArticleDto>), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(BaseResponseModel<ArticleDto>), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<BaseResponseModel<ArticleDto>>> UpdateArticleAsync(Guid id, [FromBody, Required] UpdateArticleDto dto,
+    public async Task<IActionResult> UpdateArticleAsync(Guid id, [FromBody, Required] UpdateArticleDto dto,
         CancellationToken ct)
     {
         try
@@ -193,7 +193,7 @@ public class AdminArticlesController : ControllerBase
     [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(BaseResponseModel<ArticleDto>), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(BaseResponseModel<ArticleDto>), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<BaseResponseModel<ArticleDto>>> DeleteArticleAsync([Required] Guid id, CancellationToken ct)
+    public async Task<IActionResult> DeleteArticleAsync([Required] Guid id, CancellationToken ct)
     {
         try
         {

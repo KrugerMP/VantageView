@@ -33,7 +33,7 @@ public class ArticlesController : ControllerBase
     /// <returns>List of article summaries.</returns>
     [HttpGet]
     [ProducesResponseType(typeof(BaseResponseModel<List<ArticleListItemDto>>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<BaseResponseModel<List<ArticleListItemDto>>>> GetArticlesAsync(CancellationToken ct)
+    public async Task<IActionResult> GetArticlesAsync(CancellationToken ct)
     {
         try
         {
@@ -67,7 +67,7 @@ public class ArticlesController : ControllerBase
     [HttpGet("{id:guid}", Name = "GetArticle")]
     [ProducesResponseType(typeof(BaseResponseModel<ArticleDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<BaseResponseModel<ArticleDto>>> GetArticleAsync(Guid id, CancellationToken ct)
+    public async Task<IActionResult> GetArticleAsync(Guid id, CancellationToken ct)
     {
         try
         {
