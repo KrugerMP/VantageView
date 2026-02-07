@@ -1,0 +1,73 @@
+# VantageView - run all applications (same ports as scripts/run-all)
+# Usage: docker compose up --build
+#
+# Ports (match scripts/run-all):
+#   API:          http://localhost:5157
+#   Auth:         http://localhost:5098
+#   Frontend:     http://localhost:5059
+#   Admin Portal: http://localhost:5046
+
+services:
+  api:
+    build:
+      context: ./src
+      dockerfile: VantageView.API/Dockerfile
+    ports:
+      - "5157:5157"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: "Data Source=/app/data/vantageview.db"
+      Jwt__Key: "VantageView-Development-SecretKey-MustBe32CharsOrMore!"
+      Jwt__Issuer: "VantageView.Auth"
+      Jwt__Audience: "VantageView.API"
+    volumes:
+      - vantageview_data:/app/data
+    depends_on:
+      - auth
+
+  auth:
+    build:
+      context: ./src
+      dockerfile: VantageView.Auth/Dockerfile
+    ports:
+      - "5098:5098"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: "Data Source=/app/data/vantageview.db"
+      Jwt__Key: "VantageView-Development-SecretKey-MustBe32CharsOrMore!"
+      Jwt__Issuer: "VantageView.Auth"
+      Jwt__Audience: "VantageView.API"
+    volumes:
+      - vantageview_data:/app/data
+
+  frontend:
+    build:
+      context: ./src
+      dockerfile: VantageView.Frontend/Dockerfile
+    ports:
+      - "5059:5059"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ApiBaseUrl: "http://api:5157"
+    depends_on:
+      - api
+
+  adminportal:
+    build:
+      context: ./src
+      dockerfile: VantageView.Admin.Portal/Dockerfile
+    ports:
+      - "5046:5046"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ApiBaseUrl: "http://api:5157"
+      AuthBaseUrl: "http://auth:5098"
+      Jwt__Key: "VantageView-Development-SecretKey-MustBe32CharsOrMore!"
+      Jwt__Issuer: "VantageView.Auth"
+      Jwt__Audience: "VantageView.API"
+    depends_on:
+      - api
+      - auth
+
+volumes:
+  vantageview_data:
