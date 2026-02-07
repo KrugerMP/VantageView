@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using VantageView.Auth.Domain.Auth.Commands;
+using VantageView.Auth.Middleware;
 using VantageView.Data;
 using VantageView.Data.Entities;
 
@@ -42,6 +43,7 @@ using (IServiceScope scope = app.Services.CreateScope())
     }
 }
 
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseCors();
 
 if (app.Environment.IsDevelopment())
