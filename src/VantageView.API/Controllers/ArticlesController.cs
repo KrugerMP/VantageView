@@ -1,9 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using VantageView.API.Domain.Articles.Queries;
 using VantageView.API.Models;
-using VantageView.Data;
-using VantageView.Data.Entities;
 
 namespace VantageView.API.Controllers;
 

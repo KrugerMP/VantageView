@@ -2,10 +2,10 @@ using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using VantageView.API.Domain.AdminArticles.Commands;
+using VantageView.API.Domain.Articles.Queries;
 using VantageView.API.Models;
 using VantageView.API.Validations;
-using VantageView.Data;
-using VantageView.Data.Entities;
 
 namespace VantageView.API.Controllers;
 
@@ -18,18 +18,21 @@ namespace VantageView.API.Controllers;
 [Authorize]
 public class AdminArticlesController : ControllerBase
 {
-    private readonly AppDbContext _db;
     private readonly ILogger<AdminArticlesController> _logger;
+    private readonly IAdminArticlesCommands _adminArticlesCommands;
+
+    private readonly IArticleQueries _articleQueries;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AdminArticlesController"/> class.
     /// </summary>
-    /// <param name="db">The database context.</param>
     /// <param name="logger">The logger for diagnostics.</param>
-    public AdminArticlesController(AppDbContext db, ILogger<AdminArticlesController> logger)
+    /// <param name="adminArticlesCommands">The admin article commands (create, update, delete).</param>
+    public AdminArticlesController(ILogger<AdminArticlesController> logger, IAdminArticlesCommands adminArticlesCommands, IArticleQueries articleQueries)
     {
-        _db = db;
         _logger = logger;
+        _adminArticlesCommands = adminArticlesCommands;
+        _articleQueries = articleQueries;
     }
 
     /// <summary>
@@ -68,26 +71,14 @@ public class AdminArticlesController : ControllerBase
                     errors));
             }
 
-            DateTime now = DateTime.UtcNow;
-            DateTime publishedAt = dto.PublishedAt ?? now;
+            (bool success, ArticleDto? result) = await _adminArticlesCommands.CreateArticleAsync(dto, ct);
 
-            Article article = new()
+            if (!success || result is null)
             {
-                Id = Guid.NewGuid(),
-                Title = dto.Title,
-                Summary = dto.Summary,
-                Content = dto.Content,
-                Author = dto.Author,
-                PublishedAt = publishedAt,
-                CreatedAt = now,
-                UpdatedAt = now
-            };
-            _db.Articles.Add(article);
-            await _db.SaveChangesAsync(ct);
+                throw new Exception("Could not create article");
+            }
 
-            ArticleDto result = new(article.Id, article.Title, article.Summary, article.Content, article.Author,
-                article.PublishedAt, article.UpdatedAt);
-            return CreatedAtRoute("GetArticle", new { id = article.Id }, new BaseResponseModel<ArticleDto>
+            return CreatedAtRoute("GetArticle", new { id = result.Id }, new BaseResponseModel<ArticleDto>
             {
                 Result = result,
                 Message = "Article created",
@@ -123,7 +114,7 @@ public class AdminArticlesController : ControllerBase
     {
         try
         {
-            Article? article = await _db.Articles.FindAsync([id], ct);
+            ArticleDto? article = await _articleQueries.GetArticlesByIdAsync(id, ct);
             if (article is null)
             {
                 _logger.LogWarning("Could not find article {ArticleId}", id);
@@ -158,31 +149,23 @@ public class AdminArticlesController : ControllerBase
                     errors));
             }
 
-            DateTime now = DateTime.UtcNow;
-            _db.ArticleHistory.Add(new ArticleHistory
+            (bool found, ArticleDto? result) = await _adminArticlesCommands.UpdateArticleAsync(id, dto, ct);
+
+            if (!found || result is null)
             {
-                Id = Guid.NewGuid(),
-                ArticleId = article.Id,
-                Title = article.Title,
-                Summary = article.Summary,
-                Content = article.Content,
-                Author = article.Author,
-                PublishedAt = article.PublishedAt,
-                RecordedAt = now
-            });
+                _logger.LogWarning("Could not find article {ArticleId}", id);
+                return NotFound(new BaseResponseModel<ArticleDto>
+                {
+                    Error = new ErrorResponseModel { Message = "Could not find article to update." },
+                    Message = "Error processing request",
+                    ResponseTime = DateTime.UtcNow,
+                    Result = null!
+                });
+            }
 
-            article.Title = dto.Title;
-            article.Summary = dto.Summary;
-            article.Content = dto.Content;
-            article.UpdatedAt = now;
-
-            await _db.SaveChangesAsync(ct);
-
-            ArticleDto updatedDto = new(article.Id, article.Title, article.Summary, article.Content, article.Author,
-                article.PublishedAt, article.UpdatedAt);
             return Ok(new BaseResponseModel<ArticleDto>
             {
-                Result = updatedDto,
+                Result = result,
                 Message = "Article updated",
                 ResponseTime = DateTime.UtcNow
             });
@@ -210,13 +193,13 @@ public class AdminArticlesController : ControllerBase
     [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(BaseResponseModel<ArticleDto>), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(BaseResponseModel<ArticleDto>), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<BaseResponseModel<Article>>> DeleteArticleAsync([Required] Guid id, CancellationToken ct)
+    public async Task<ActionResult<BaseResponseModel<ArticleDto>>> DeleteArticleAsync([Required] Guid id, CancellationToken ct)
     {
         try
         {
-            Article? article = await _db.Articles.FindAsync([id], ct);
+            (bool found, ArticleDto? result) = await _adminArticlesCommands.DeleteArticleAsync(id, ct);
 
-            if (article is null)
+            if (!found)
             {
                 _logger.LogWarning("Could not find article {ArticleId}", id);
                 return NotFound(new BaseResponseModel<ArticleDto>
@@ -228,28 +211,11 @@ public class AdminArticlesController : ControllerBase
                 });
             }
 
-            _db.ArticleHistory.Add(new ArticleHistory
-            {
-                Id = Guid.NewGuid(),
-                ArticleId = article.Id,
-                Title = article.Title,
-                Summary = article.Summary,
-                Content = article.Content,
-                Author = article.Author,
-                PublishedAt = article.PublishedAt,
-                RecordedAt = DateTime.UtcNow
-            });
-
-            _db.Articles.Remove(article);
-            await _db.SaveChangesAsync(ct);
-
-            ArticleDto dto = new(article.Id, article.Title, article.Summary, article.Content, article.Author, article.PublishedAt, article.UpdatedAt);
-
             return Ok(new BaseResponseModel<ArticleDto>
             {
                 Message = "Article deleted",
                 ResponseTime = DateTime.UtcNow,
-                Result = dto
+                Result = result!
             });
         }
         catch (Exception ex)
