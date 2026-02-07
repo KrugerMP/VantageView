@@ -4,6 +4,8 @@ A full-stack **Corporate News System** built with .NET—a RESTful API and Blazo
 
 ## Overview
 
+Test stop push
+
 VantageView demonstrates a scalable C# application with database interactions, secure authentication, and a modern UI. The system consists of:
 
 - **Public Frontend** — Browse news articles (list view and detail pages)
