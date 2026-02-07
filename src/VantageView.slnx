@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="VantageView.Admin.Portal/VantageView.Admin.Portal.csproj" />
+  <Project Path="VantageView.API.Tests/VantageView.API.Tests.csproj" />
   <Project Path="VantageView.API/VantageView.API.csproj" />
   <Project Path="VantageView.Auth/VantageView.Auth.csproj" />
   <Project Path="VantageView.Data/VantageView.Data.csproj" />

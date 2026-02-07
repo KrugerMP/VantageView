@@ -36,7 +36,7 @@ public class HealthController : ControllerBase
     [HttpGet("articles")]
     [ProducesResponseType(typeof(BaseResponseModel<HealthDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<BaseResponseModel<HealthDto>>> GetArticlesServiceHealthAsync(CancellationToken ct)
+    public async Task<IActionResult> GetArticlesServiceHealthAsync(CancellationToken ct)
     {
         try
         {

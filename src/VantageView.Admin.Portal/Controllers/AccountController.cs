@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -51,7 +52,7 @@ public class AccountController : Controller
     [HttpPost]
     [Route("account/login")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> LoginAsync([FromForm] string? username, [FromForm] string? password)
+    public async Task<IActionResult> LoginAsync([FromForm, Required] string? username, [FromForm, Required] string? password)
     {
         if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
         {
