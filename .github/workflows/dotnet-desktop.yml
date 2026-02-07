@@ -28,3 +28,6 @@ jobs:
 
     - name: Build
       run: dotnet build src/VantageView.slnx --no-restore -c ${{ matrix.configuration }}
+
+    - name: Test
+      run: dotnet test src/VantageView.slnx --no-build -c ${{ matrix.configuration }} --verbosity normal
