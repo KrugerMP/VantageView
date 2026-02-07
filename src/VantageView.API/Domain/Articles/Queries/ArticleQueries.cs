@@ -1,10 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using VantageView.API.Models;
 using VantageView.Data;
 using VantageView.Data.Entities;
 
 namespace VantageView.API.Domain.Articles.Queries;
 
+/// <summary>
+/// Provides read queries for news articles (list and by ID).
+/// </summary>
 public class ArticleQueries : IArticleQueries
 {
     private readonly AppDbContext _db;
@@ -21,6 +24,11 @@ public class ArticleQueries : IArticleQueries
         _logger = logger;
     }
 
+    /// <summary>
+    /// Gets all articles ordered by publication date (newest first).
+    /// </summary>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>List of article list DTOs, or null on error.</returns>
     public async Task<List<ArticleListItemDto>> GetAllArticlesAsync(CancellationToken ct)
     {
         try
@@ -39,6 +47,12 @@ public class ArticleQueries : IArticleQueries
         }
     }
 
+    /// <summary>
+    /// Gets a single article by ID.
+    /// </summary>
+    /// <param name="id">The article identifier.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>The article DTO if found; otherwise null.</returns>
     public async Task<ArticleDto?> GetArticlesByIdAsync(Guid id, CancellationToken ct)
     {
         try

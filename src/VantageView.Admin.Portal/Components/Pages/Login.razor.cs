@@ -9,9 +9,15 @@ namespace VantageView.Admin.Portal.Components.Pages;
 /// </summary>
 public partial class Login
 {
+    /// <summary>
+    /// Gets or sets the antiforgery service for generating form tokens.
+    /// </summary>
     [Inject]
     private IAntiforgery Antiforgery { get; set; } = null!;
 
+    /// <summary>
+    /// Gets or sets the HTTP context accessor for the current request.
+    /// </summary>
     [Inject]
     private IHttpContextAccessor HttpContextAccessor { get; set; } = null!;
 
@@ -26,6 +32,7 @@ public partial class Login
     /// </summary>
     private string? AntiforgeryRequestToken { get; set; }
 
+    /// <inheritdoc />
     protected override void OnInitialized()
     {
         HttpContext? context = HttpContextAccessor.HttpContext;
@@ -36,6 +43,9 @@ public partial class Login
         }
     }
 
+    /// <summary>
+    /// Gets the user-facing error message based on the error query parameter.
+    /// </summary>
     private string? ErrorMessage =>
         Error switch
         {

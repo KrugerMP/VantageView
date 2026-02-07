@@ -1,4 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -10,6 +10,9 @@ using VantageView.Data.Entities;
 
 namespace VantageView.Auth.Domain.Auth.Commands;
 
+/// <summary>
+/// Handles authentication commands (e.g. user login and JWT issuance).
+/// </summary>
 public class AuthCommands: IAuthCommands
 {
     private readonly IConfiguration _configuration;
@@ -30,6 +33,12 @@ public class AuthCommands: IAuthCommands
         _db = db;
     }
 
+    /// <summary>
+    /// Validates credentials and issues a JWT on success.
+    /// </summary>
+    /// <param name="loginRequest">The login credentials.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>A tuple of (success, message or error text, token or empty).</returns>
     public async Task<(bool logonResult, string message, string token)> LogonUserAsync(LoginRequest loginRequest, CancellationToken ct)
     {
         try
@@ -73,23 +82,27 @@ public class AuthCommands: IAuthCommands
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "AN error occurred when trying to sign in user: {UserName}", loginRequest.Username);
+            _logger.LogError(ex, "An error occurred when trying to sign in user: {UserName}", loginRequest.Username);
             return (false, "Invalid username or password entered", string.Empty);
         }
     }
 
+    /// <summary>
+    /// Computes the SHA-256 hash of the input as a lowercase hex string.
+    /// </summary>
+    /// <param name="input">The string to hash (e.g. password).</param>
+    /// <returns>The hex-encoded hash, or empty string if input is null or empty.</returns>
     private static string HashPasswordSha256(string input)
     {
         if (string.IsNullOrEmpty(input))
+        {
             return string.Empty;
-
+        }
+            
         byte[] bytes = Encoding.UTF8.GetBytes(input);
         byte[] hash = SHA256.HashData(bytes);
 
         // Most common format: lowercase hex without dashes
         return Convert.ToHexString(hash).ToLowerInvariant();
-
-        // Alternative: uppercase with dashes (very common too)
-        // return BitConverter.ToString(hash).Replace("-", "");
     }
 }

@@ -34,8 +34,9 @@ public class AuthController : ControllerBase
     /// <summary>
     /// Authenticates an admin user and returns a JWT bearer token.
     /// </summary>
-    /// <param name="request">Login credentials (simplified demo: admin/admin).</param>
-    /// <returns>200 OK with JWT token on success; 401 Unauthorized on invalid credentials.</returns>
+    /// <param name="request">Login credentials.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>200 OK with JWT token on success; 401 Unauthorized on invalid credentials; 500 on error.</returns>
     [HttpPost("login")]
     [ProducesResponseType(typeof(BaseResponseModel<LoginResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
