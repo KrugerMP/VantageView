@@ -39,22 +39,33 @@ public class AdminArticlesController : ControllerBase
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The created article.</returns>
     [HttpPost]
-    [ProducesResponseType(typeof(ArticleDto), StatusCodes.Status201Created)]
-    public async Task<ActionResult<ArticleDto>> CreateArticleAsync([FromBody, Required] CreateArticleDto dto, CancellationToken ct)
+    [ProducesResponseType(typeof(BaseResponseModel<ArticleDto>), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<BaseResponseModel<ArticleDto>>> CreateArticleAsync([FromBody, Required] CreateArticleDto dto,
+        CancellationToken ct)
     {
         try
         {
             CreateArticleDtoValidator createArticleDtoValidator = new();
-            FluentValidation.Results.ValidationResult? validationResult = await createArticleDtoValidator.ValidateAsync(dto, ct);
+            FluentValidation.Results.ValidationResult? validationResult =
+                await createArticleDtoValidator.ValidateAsync(dto, ct);
 
             if (validationResult is null)
             {
-                throw new Exception($"Validation result was null for the following request:{JsonSerializer.Serialize(dto)}");
+                throw new Exception(
+                    $"Validation result was null for the following request:{JsonSerializer.Serialize(dto)}");
             }
 
             if (!validationResult.IsValid)
             {
-                return BadRequest(validationResult.Errors);
+                IReadOnlyDictionary<string, string[]> errors = validationResult.Errors
+                    .GroupBy(e => e.PropertyName)
+                    .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray());
+
+                return BadRequest(new ValidationErrorResponse(
+                    StatusCodes.Status400BadRequest,
+                    "One or more validation errors occurred.",
+                    errors));
             }
 
             DateTime now = DateTime.UtcNow;
@@ -74,13 +85,24 @@ public class AdminArticlesController : ControllerBase
             _db.Articles.Add(article);
             await _db.SaveChangesAsync(ct);
 
-            ArticleDto result = new(article.Id, article.Title, article.Summary, article.Content, article.Author, article.PublishedAt, article.UpdatedAt);
-            return CreatedAtRoute("GetArticle", new { id = article.Id }, result);
+            ArticleDto result = new(article.Id, article.Title, article.Summary, article.Content, article.Author,
+                article.PublishedAt, article.UpdatedAt);
+            return CreatedAtRoute("GetArticle", new { id = article.Id }, new BaseResponseModel<ArticleDto>
+            {
+                Result = result,
+                Message = "Article created",
+                ResponseTime = DateTime.UtcNow
+            });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating article.");
-            return BadRequest();
+            return BadRequest(new BaseResponseModel<ArticleDto>
+            {
+                Error = new ErrorResponseModel { Message = "Error creating article." },
+                ResponseTime = DateTime.UtcNow,
+                Message = "An error occurred when creating the article" 
+            });
         }
     }
 
@@ -92,46 +114,88 @@ public class AdminArticlesController : ControllerBase
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The updated article, or 404 if not found.</returns>
     [HttpPut("{id:guid}")]
-    [ProducesResponseType(typeof(ArticleDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<ArticleDto>> UpdateArticleAsync(Guid id, [FromBody, Required] UpdateArticleDto dto, CancellationToken ct)
+    [ProducesResponseType(typeof(BaseResponseModel<ArticleDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(BaseResponseModel<ArticleDto>), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(BaseResponseModel<ArticleDto>), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<BaseResponseModel<ArticleDto>>> UpdateArticleAsync(Guid id, [FromBody, Required] UpdateArticleDto dto,
+        CancellationToken ct)
     {
         try
         {
             Article? article = await _db.Articles.FindAsync([id], ct);
             if (article is null)
             {
-                _logger.LogWarning($"Could not find article {id}");
-                return NotFound();
+                _logger.LogWarning("Could not find article {ArticleId}", id);
+                return NotFound(new BaseResponseModel<ArticleDto>
+                {
+                    Error = new ErrorResponseModel { Message = "Could not find article to update." },
+                    Message = "Error processing request",
+                    ResponseTime = DateTime.UtcNow,
+                    Result = null!
+                });
             }
 
             UpdateArticleDtoValidator updateArticleDtoValidator = new();
-            FluentValidation.Results.ValidationResult? validationResult = await updateArticleDtoValidator.ValidateAsync(dto, ct);
+            FluentValidation.Results.ValidationResult? validationResult =
+                await updateArticleDtoValidator.ValidateAsync(dto, ct);
 
             if (validationResult is null)
             {
-                throw new Exception($"Validation result was null for the following request:{JsonSerializer.Serialize(dto)}");
+                throw new Exception(
+                    $"Validation result was null for the following request:{JsonSerializer.Serialize(dto)}");
             }
 
             if (!validationResult.IsValid)
             {
-                return BadRequest(validationResult.Errors);
+                IReadOnlyDictionary<string, string[]> errors = validationResult.Errors
+                    .GroupBy(e => e.PropertyName)
+                    .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray());
+
+                return BadRequest(new ValidationErrorResponse(
+                    StatusCodes.Status400BadRequest,
+                    "One or more validation errors occurred.",
+                    errors));
             }
-                
+
+            DateTime now = DateTime.UtcNow;
+            _db.ArticleHistory.Add(new ArticleHistory
+            {
+                Id = Guid.NewGuid(),
+                ArticleId = article.Id,
+                Title = article.Title,
+                Summary = article.Summary,
+                Content = article.Content,
+                Author = article.Author,
+                PublishedAt = article.PublishedAt,
+                RecordedAt = now
+            });
+
             article.Title = dto.Title;
             article.Summary = dto.Summary;
             article.Content = dto.Content;
-
-            article.UpdatedAt = DateTime.UtcNow;
+            article.UpdatedAt = now;
 
             await _db.SaveChangesAsync(ct);
 
-            return Ok(new ArticleDto(article.Id, article.Title, article.Summary, article.Content, article.Author, article.PublishedAt, article.UpdatedAt));
+            ArticleDto updatedDto = new(article.Id, article.Title, article.Summary, article.Content, article.Author,
+                article.PublishedAt, article.UpdatedAt);
+            return Ok(new BaseResponseModel<ArticleDto>
+            {
+                Result = updatedDto,
+                Message = "Article updated",
+                ResponseTime = DateTime.UtcNow
+            });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating article {ArticleId}.", id);
-            return BadRequest();
+            return BadRequest(new BaseResponseModel<ArticleDto>
+            {
+                Error = new ErrorResponseModel { Message = "Error updating article." },
+                ResponseTime = DateTime.UtcNow,
+                Message = "Error updating article."
+            });
         }
     }
 
@@ -140,30 +204,63 @@ public class AdminArticlesController : ControllerBase
     /// </summary>
     /// <param name="id">The article ID.</param>
     /// <param name="ct">Cancellation token.</param>
-    /// <returns>204 No Content on success, or 404 if not found.</returns>
+    /// <returns>200 OK with message on success, or 404 if not found.</returns>
     [HttpDelete("{id:guid}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult> DeleteArticleAsync([Required] Guid id, CancellationToken ct)
+    [ProducesResponseType(typeof(BaseResponseModel<ArticleDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(BaseResponseModel<ArticleDto>), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(BaseResponseModel<ArticleDto>), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<BaseResponseModel<Article>>> DeleteArticleAsync([Required] Guid id, CancellationToken ct)
     {
         try
         {
             Article? article = await _db.Articles.FindAsync([id], ct);
-            
+
             if (article is null)
             {
-                return NotFound();
+                _logger.LogWarning("Could not find article {ArticleId}", id);
+                return NotFound(new BaseResponseModel<ArticleDto>
+                {
+                    Error = new ErrorResponseModel { Message = "Could not find article to delete." },
+                    Message = "Error processing request",
+                    ResponseTime = DateTime.UtcNow,
+                    Result = null!
+                });
             }
+
+            _db.ArticleHistory.Add(new ArticleHistory
+            {
+                Id = Guid.NewGuid(),
+                ArticleId = article.Id,
+                Title = article.Title,
+                Summary = article.Summary,
+                Content = article.Content,
+                Author = article.Author,
+                PublishedAt = article.PublishedAt,
+                RecordedAt = DateTime.UtcNow
+            });
 
             _db.Articles.Remove(article);
             await _db.SaveChangesAsync(ct);
 
-            return NoContent();
+            ArticleDto dto = new(article.Id, article.Title, article.Summary, article.Content, article.Author, article.PublishedAt, article.UpdatedAt);
+
+            return Ok(new BaseResponseModel<ArticleDto>
+            {
+                Message = "Article deleted",
+                ResponseTime = DateTime.UtcNow,
+                Result = dto
+            });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting article {ArticleId}.", id);
-            return BadRequest();
+            return BadRequest(new BaseResponseModel<ArticleDto>
+            {
+                Error = new ErrorResponseModel { Message = "Error deleting article." },
+                ResponseTime = DateTime.UtcNow,
+                Message = "Error deleting article."
+            });
         }
     }
 }

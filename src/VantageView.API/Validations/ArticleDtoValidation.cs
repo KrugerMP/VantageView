@@ -3,8 +3,14 @@ using VantageView.API.Models;
 
 namespace VantageView.API.Validations;
 
+/// <summary>
+/// Validates <see cref="CreateArticleDto"/> when creating a new article.
+/// </summary>
 public class CreateArticleDtoValidator : AbstractValidator<CreateArticleDto>
 {
+    /// <summary>
+    /// Initializes validation rules for create-article requests.
+    /// </summary>
     public CreateArticleDtoValidator()
     {
         RuleFor(x => x.Title)
@@ -23,8 +29,14 @@ public class CreateArticleDtoValidator : AbstractValidator<CreateArticleDto>
     }
 }
 
+/// <summary>
+/// Validates <see cref="UpdateArticleDto"/> when updating an existing article.
+/// </summary>
 public class UpdateArticleDtoValidator : AbstractValidator<UpdateArticleDto>
 {
+    /// <summary>
+    /// Initializes validation rules for update-article requests.
+    /// </summary>
     public UpdateArticleDtoValidator()
     {
         RuleFor(x => x.Title)

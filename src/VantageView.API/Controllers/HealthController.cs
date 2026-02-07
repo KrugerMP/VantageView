@@ -34,9 +34,9 @@ public class HealthController : ControllerBase
     /// <param name="ct">Cancellation token.</param>
     /// <returns>200 OK if the service is healthy; 400 Bad Request if no articles exist.</returns>
     [HttpGet("articles")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(BaseResponseModel<HealthDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<HealthDto>> GetArticlesServiceHealthAsync(CancellationToken ct)
+    public async Task<ActionResult<BaseResponseModel<HealthDto>>> GetArticlesServiceHealthAsync(CancellationToken ct)
     {
         try
         {
@@ -44,15 +44,33 @@ public class HealthController : ControllerBase
 
             if (article is null)
             {
-                return BadRequest(new HealthDto { IsHealthy = false, Message = "No articles found" });
+                return BadRequest(new BaseResponseModel<HealthDto>
+                {
+                    Result = new HealthDto { IsHealthy = false, Message = "No articles found" },
+                    Error = new ErrorResponseModel { Message = "No articles found" },
+                    ResponseTime = DateTime.UtcNow,
+                    Message = "Health of service could not be guaranteed"
+                });
             }
 
-            return Ok(new HealthDto { IsHealthy = true, Message = "Articles service is healthy" });
+            return Ok(new BaseResponseModel<HealthDto>
+            {
+                Result = new HealthDto { IsHealthy = true, Message = "Articles service is healthy" },
+                ResponseTime = DateTime.UtcNow,
+                Message = "Successfully processed health request",
+                Error = new ErrorResponseModel { Message = string.Empty }
+            });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error checking articles service health.");
-            return BadRequest(new HealthDto { IsHealthy = false, Message = $"Error checking articles service health." });
+            return BadRequest(new BaseResponseModel<HealthDto>
+            {
+                Result = new HealthDto { IsHealthy = false, Message = "Error checking articles service health." },
+                Error = new ErrorResponseModel { Message = "Error checking articles service health." },
+                ResponseTime = DateTime.UtcNow,
+                Message = "Error checking articles service health."
+            });
         }
     }
 }

@@ -34,8 +34,8 @@ public class ArticlesController : ControllerBase
     /// <param name="ct">Cancellation token.</param>
     /// <returns>List of article summaries.</returns>
     [HttpGet]
-    [ProducesResponseType(typeof(List<ArticleListItemDto>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<List<ArticleListItemDto>>> GetArticlesAsync(CancellationToken ct)
+    [ProducesResponseType(typeof(BaseResponseModel<List<ArticleListItemDto>>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<BaseResponseModel<List<ArticleListItemDto>>>> GetArticlesAsync(CancellationToken ct)
     {
         try
         {
@@ -44,12 +44,22 @@ public class ArticlesController : ControllerBase
                 .Select(a => new ArticleListItemDto(a.Id, a.Title, a.Summary, a.Author, a.PublishedAt, a.UpdatedAt))
                 .ToListAsync(ct);
 
-            return Ok(articles);
+            return Ok(new BaseResponseModel<List<ArticleListItemDto>>
+            {
+                Result = articles,
+                ResponseTime = DateTime.UtcNow,
+                Message = "Articles retrieved successfully."
+            });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error fetching articles.");
-            return BadRequest();
+            return BadRequest(new BaseResponseModel<List<ArticleListItemDto>>
+            {
+                Error = new ErrorResponseModel { Message = "Error fetching articles." },
+                ResponseTime = DateTime.UtcNow,
+                Message = "Error fetching articles."
+            });
         }
     }
 
@@ -60,24 +70,41 @@ public class ArticlesController : ControllerBase
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The article if found; otherwise 404.</returns>
     [HttpGet("{id:guid}", Name = "GetArticle")]
-    [ProducesResponseType(typeof(ArticleDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(BaseResponseModel<ArticleDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<ArticleDto>> GetArticleAsync(Guid id, CancellationToken ct)
+    public async Task<ActionResult<BaseResponseModel<ArticleDto>>> GetArticleAsync(Guid id, CancellationToken ct)
     {
         try
         {
             Article? article = await _db.Articles.FindAsync([id], ct);
             if (article is null)
             {
-                return NotFound();
+                return NotFound(new BaseResponseModel<ArticleDto>
+                {
+                    Error = new ErrorResponseModel { Message = "Article not found." },
+                    ResponseTime = DateTime.UtcNow,
+                    Result = null!,
+                    Message = "Article not found."
+                });
             }
 
-            return Ok(new ArticleDto(article.Id, article.Title, article.Summary, article.Content, article.Author, article.PublishedAt, article.UpdatedAt));
+            ArticleDto dto = new(article.Id, article.Title, article.Summary, article.Content, article.Author, article.PublishedAt, article.UpdatedAt);
+            return Ok(new BaseResponseModel<ArticleDto>
+            {
+                Result = dto,
+                ResponseTime = DateTime.UtcNow,
+                Message = "Article retrieved successfully."
+            });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error fetching article {ArticleId}.", id);
-            return BadRequest();
+            return BadRequest(new BaseResponseModel<ArticleDto>
+            {
+                Error = new ErrorResponseModel { Message = "Error fetching article." },
+                ResponseTime = DateTime.UtcNow,
+                Message = "Error fetching article."
+            });
         }
     }
 }

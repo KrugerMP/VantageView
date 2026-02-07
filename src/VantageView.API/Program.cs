@@ -1,7 +1,10 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using VantageView.API.Middleware;
+using VantageView.API.Models;
 using VantageView.Data;
 using VantageView.Data.Entities;
 
@@ -50,7 +53,26 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            Dictionary<string, string[]> errors = context.ModelState
+                .Where(e => e.Value?.Errors.Count > 0)
+                .ToDictionary(
+                    e => e.Key,
+                    e => e.Value!.Errors.Select(err => err.ErrorMessage).ToArray());
+
+            ValidationErrorResponse response = new(
+                Status: StatusCodes.Status400BadRequest,
+                Message: "One or more validation errors occurred.",
+                Errors: errors);
+
+            return new BadRequestObjectResult(response);
+        };
+    });
+
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -71,7 +93,7 @@ using (IServiceScope scope = app.Services.CreateScope())
                 Id = Guid.NewGuid(),
                 Title = "Welcome to VantageView",
                 Summary = "Your corporate news system is ready.",
-                Content = "This is the first article. Edit or delete it from the Admin Portal.",
+                Content = $"This is the first article. Edit or delete it from the Admin Portal.{Environment.NewLine}If you are seeing this article, it means everything is running",
                 Author = "System",
                 PublishedAt = now,
                 CreatedAt = now,
@@ -81,6 +103,7 @@ using (IServiceScope scope = app.Services.CreateScope())
     }
 }
 
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();

@@ -59,11 +59,19 @@ src/
 
 ### 1. Apply EF Core Migrations (optional)
 
-Migrations are applied automatically when the API starts. To run manually:
+Note: Ensure you have `dotnet ef` installed, if not run `dotnet tool install --global dotnet-ef`
+
+## To add a new table to the migrations run:
 
 ```bash
-cd src
-dotnet ef database update --project VantageView.Data --startup-project VantageView.API
+dotnet ef migrations add ArticleHistoryNoForeignKey
+```
+
+To apply migrations to the database if the API did not automatically apply it:
+
+```bash
+cd src/VantageView.Data
+dotnet ef database update
 ```
 
 ### 2. Run All Applications (recommended)
