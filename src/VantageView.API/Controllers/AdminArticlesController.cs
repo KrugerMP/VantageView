@@ -28,6 +28,7 @@ public class AdminArticlesController : ControllerBase
     /// </summary>
     /// <param name="logger">The logger for diagnostics.</param>
     /// <param name="adminArticlesCommands">The admin article commands (create, update, delete).</param>
+    /// <param name="articleQueries">The article query service.</param>
     public AdminArticlesController(ILogger<AdminArticlesController> logger, IAdminArticlesCommands adminArticlesCommands, IArticleQueries articleQueries)
     {
         _logger = logger;
