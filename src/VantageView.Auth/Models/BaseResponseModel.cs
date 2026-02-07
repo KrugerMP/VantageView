@@ -15,6 +15,9 @@ public class BaseResponseModel<T> where T : class
     /// </summary>
     public DateTime ResponseTime { get; set; }
 
+    /// <summary>
+    /// Gets or sets the response payload (e.g. login token).
+    /// </summary>
     public T Result { get; set; } = null!;
 
     /// <summary>

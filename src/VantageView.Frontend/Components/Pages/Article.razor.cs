@@ -22,7 +22,7 @@ public partial class Article
     private IHttpClientFactory HttpClientFactory { get; set; } = null!;
 
     /// <summary>
-    /// Injects the logging service for audit trails
+    /// Gets or sets the logger for this component.
     /// </summary>
     [Inject]
     private ILogger<Article> Logger { get; set; } = null!;

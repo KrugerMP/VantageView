@@ -42,9 +42,10 @@ VantageView demonstrates a scalable C# application with database interactions, s
 
 ```
 src/
-├── VantageView.API/          # REST API — public article endpoints, admin CRUD
+├── VantageView.API/          # REST API — public article endpoints, admin CRUD, health checks
+├── VantageView.API.Tests/    # Unit tests (e.g. HealthController)
 ├── VantageView.Auth/         # Auth service — JWT token issuance (admin/admin)
-├── VantageView.Data/         # EF Core DbContext, Article entity, migrations
+├── VantageView.Data/         # EF Core DbContext, entities, migrations
 ├── VantageView.Frontend/     # Public Blazor app — article listing & detail
 ├── VantageView.Admin.Portal/ # Admin Blazor app — article management (JWT)
 └── VantageView.slnx          # Solution file
@@ -125,4 +126,24 @@ dotnet run --project VantageView.Admin.Portal --launch-profile http
 ```
 
 API runs Swagger at `http://localhost:5157/swagger`. Sample articles are seeded when the database is empty. Log in to the Admin Portal at `http://localhost:5046/login` with **admin** / **admin**, then manage articles at `/articles`.
+
+### 4. Run Unit Tests
+
+From the repository root:
+
+```bash
+cd src
+dotnet test VantageView.API.Tests/VantageView.API.Tests.csproj
+```
+
+To run tests for the whole solution:
+
+```bash
+cd src
+dotnet test VantageView.slnx
+```
+
+### 5. CI / GitHub Actions
+
+A GitHub Action (`.github/workflows/dotnet-desktop.yml`) builds the solution on every **push** and **pull request** to the `develop` branch. It restores and builds the solution; ensure tests pass locally before pushing.
 

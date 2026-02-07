@@ -21,6 +21,7 @@ public class HealthController : ControllerBase
     /// <summary>
     /// Initializes a new instance of the <see cref="HealthController"/> class.
     /// </summary>
+    /// <param name="healthQueries">The health check query service.</param>
     /// <param name="logger">The logger for health check diagnostics.</param>
     public HealthController(IHealthQueries healthQueries, ILogger<HealthController> logger)
     {

@@ -16,6 +16,9 @@ public partial class Articles
     [Inject]
     private IHttpClientFactory HttpClientFactory { get; set; } = null!;
 
+    /// <summary>
+    /// Gets or sets the logger for this component.
+    /// </summary>
     [Inject]
     private ILogger<Articles> Logger { get; set; } = null!;
 

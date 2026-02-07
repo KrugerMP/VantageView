@@ -19,6 +19,8 @@ public class AccountController : Controller
     /// <summary>
     /// Initializes a new instance of the <see cref="AccountController"/> class.
     /// </summary>
+    /// <param name="httpClientFactory">The HTTP client factory for calling the Auth API.</param>
+    /// <param name="logger">The logger for diagnostics.</param>
     public AccountController(
         IHttpClientFactory httpClientFactory,
         ILogger<AccountController> logger)

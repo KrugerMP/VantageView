@@ -7,19 +7,27 @@ using VantageView.API.Models;
 
 namespace VantageView.API.Tests.ControllerTests;
 
+/// <summary>
+/// Unit tests for <see cref="HealthController"/> health check endpoints.
+/// </summary>
 [TestClass]
 public class HealthControllerTests
 {
     private readonly Mock<ILogger<HealthController>> _loggerMock;
     private readonly Mock<IHealthQueries> _healthMock;
 
+    /// <summary>
+    /// Initializes mocks for the health controller and its dependencies.
+    /// </summary>
     public HealthControllerTests()
     {
         _loggerMock = new Mock<ILogger<HealthController>>();
         _healthMock = new Mock<IHealthQueries>();
     }
 
-
+    /// <summary>
+    /// Verifies that the articles health endpoint returns 400 when the service is unhealthy (no articles).
+    /// </summary>
     [TestMethod]
     public async Task HealthController_GetArticlesServiceHealthAsync_Negative_Test()
     {
@@ -43,6 +51,9 @@ public class HealthControllerTests
         Assert.IsFalse(response.Result.IsHealthy);
     }
 
+    /// <summary>
+    /// Verifies that the articles health endpoint returns 200 when the service is healthy.
+    /// </summary>
     [TestMethod]
     public async Task HealthController_GetArticlesServiceHealthAsync_Positive_Test()
     {
@@ -68,6 +79,9 @@ public class HealthControllerTests
         Assert.IsTrue(response.Result.IsHealthy);
     }
 
+    /// <summary>
+    /// Verifies that the articles health endpoint returns 400 when the health query throws an exception.
+    /// </summary>
     [TestMethod]
     public async Task HealthController_GetArticlesServiceHealthAsync_Exception_Test()
     {
