@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using VantageView.API.Domain.Health.Queries;
 using VantageView.API.Middleware;
 using VantageView.API.Models;
 using VantageView.Data;
@@ -76,6 +77,8 @@ builder.Services.AddControllers()
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<IHealthQueries, HealthQueries>();
 
 WebApplication app = builder.Build();
 

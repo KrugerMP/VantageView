@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using VantageView.Data;
 using VantageView.Data.Entities;
 using VantageView.API.Models;
+using VantageView.API.Domain.Health.Queries;
 
 namespace VantageView.API.Controllers;
 
@@ -14,17 +15,16 @@ namespace VantageView.API.Controllers;
 [Produces("application/json")]
 public class HealthController : ControllerBase
 {
-    private readonly AppDbContext _db;
+    private readonly IHealthQueries _healthQueries;
     private readonly ILogger<HealthController> _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="HealthController"/> class.
     /// </summary>
-    /// <param name="db">The database context.</param>
     /// <param name="logger">The logger for health check diagnostics.</param>
-    public HealthController(AppDbContext db, ILogger<HealthController> logger)
+    public HealthController(IHealthQueries healthQueries, ILogger<HealthController> logger)
     {
-        _db = db;
+        _healthQueries = healthQueries;
         _logger = logger;
     }
 
@@ -40,9 +40,9 @@ public class HealthController : ControllerBase
     {
         try
         {
-            Article? article = await _db.Articles.FirstOrDefaultAsync(ct);
+            bool healthResult = await _healthQueries.IsHealthyAsync(ct);
 
-            if (article is null)
+            if (!healthResult)
             {
                 return BadRequest(new BaseResponseModel<HealthDto>
                 {
