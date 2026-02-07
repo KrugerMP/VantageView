@@ -13,7 +13,7 @@ namespace VantageView.Auth.Domain.Auth.Commands;
 /// <summary>
 /// Handles authentication commands (e.g. user login and JWT issuance).
 /// </summary>
-public class AuthCommands: IAuthCommands
+public class AuthCommands : IAuthCommands
 {
     private readonly IConfiguration _configuration;
     private readonly ILogger<AuthCommands> _logger;
