@@ -1,6 +1,9 @@
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VantageView.API.Models;
+using VantageView.API.Validations;
 using VantageView.Data;
 using VantageView.Data.Entities;
 
@@ -37,10 +40,23 @@ public class AdminArticlesController : ControllerBase
     /// <returns>The created article.</returns>
     [HttpPost]
     [ProducesResponseType(typeof(ArticleDto), StatusCodes.Status201Created)]
-    public async Task<ActionResult<ArticleDto>> CreateArticleAsync([FromBody] CreateArticleDto dto, CancellationToken ct)
+    public async Task<ActionResult<ArticleDto>> CreateArticleAsync([FromBody, Required] CreateArticleDto dto, CancellationToken ct)
     {
         try
         {
+            CreateArticleDtoValidator createArticleDtoValidator = new();
+            FluentValidation.Results.ValidationResult? validationResult = await createArticleDtoValidator.ValidateAsync(dto, ct);
+
+            if (validationResult is null)
+            {
+                throw new Exception($"Validation result was null for the following request:{JsonSerializer.Serialize(dto)}");
+            }
+
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors);
+            }
+
             DateTime now = DateTime.UtcNow;
             DateTime publishedAt = dto.PublishedAt ?? now;
 
@@ -78,16 +94,30 @@ public class AdminArticlesController : ControllerBase
     [HttpPut("{id:guid}")]
     [ProducesResponseType(typeof(ArticleDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<ArticleDto>> UpdateArticleAsync(Guid id, [FromBody] UpdateArticleDto dto, CancellationToken ct)
+    public async Task<ActionResult<ArticleDto>> UpdateArticleAsync(Guid id, [FromBody, Required] UpdateArticleDto dto, CancellationToken ct)
     {
         try
         {
             Article? article = await _db.Articles.FindAsync([id], ct);
             if (article is null)
             {
+                _logger.LogWarning($"Could not find article {id}");
                 return NotFound();
             }
 
+            UpdateArticleDtoValidator updateArticleDtoValidator = new();
+            FluentValidation.Results.ValidationResult? validationResult = await updateArticleDtoValidator.ValidateAsync(dto, ct);
+
+            if (validationResult is null)
+            {
+                throw new Exception($"Validation result was null for the following request:{JsonSerializer.Serialize(dto)}");
+            }
+
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors);
+            }
+                
             article.Title = dto.Title;
             article.Summary = dto.Summary;
             article.Content = dto.Content;
@@ -114,11 +144,12 @@ public class AdminArticlesController : ControllerBase
     [HttpDelete("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult> DeleteArticleAsync(Guid id, CancellationToken ct)
+    public async Task<ActionResult> DeleteArticleAsync([Required] Guid id, CancellationToken ct)
     {
         try
         {
             Article? article = await _db.Articles.FindAsync([id], ct);
+            
             if (article is null)
             {
                 return NotFound();
