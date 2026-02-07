@@ -72,6 +72,8 @@ public partial class ArticleEdit
             return;
         }
 
+        model.Author = AuthService.UserName ?? string.Empty;
+
         if (!IsNew)
         {
             await LoadArticleAsync();
@@ -90,7 +92,8 @@ public partial class ArticleEdit
         try
         {
             HttpClient client = HttpClientFactory.CreateClient("Api");
-            ArticleDto? article = await client.GetFromJsonAsync<ArticleDto>($"api/articles/{Id}");
+            BaseResponseModel<ArticleDto>? response = await client.GetFromJsonAsync<BaseResponseModel<ArticleDto>>($"api/articles/{Id}");
+            ArticleDto? article = response?.Result;
 
             if (article is not null)
             {

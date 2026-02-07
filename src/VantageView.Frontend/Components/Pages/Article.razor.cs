@@ -51,7 +51,8 @@ public partial class Article
             HttpResponseMessage response = await client.GetAsync($"api/articles/{Id}");
             if (response.IsSuccessStatusCode)
             {
-                article = await response.Content.ReadFromJsonAsync<ArticleDto>();
+                BaseResponseModel<ArticleDto>? wrapper = await response.Content.ReadFromJsonAsync<BaseResponseModel<ArticleDto>>();
+                article = wrapper?.Result;
             }
             else if (response.StatusCode == HttpStatusCode.NotFound)
             {

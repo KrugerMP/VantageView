@@ -18,7 +18,7 @@ public partial class Home
     /// Injects the logging service for audit trails.
     /// </summary>
     [Inject]
-    private Logger<Home> Logger { get; set; } = null!;
+    private ILogger<Home> Logger { get; set; } = null!;
 
     /// <summary>
     /// The list of articles fetched from the API.
@@ -41,8 +41,8 @@ public partial class Home
         try
         {
             HttpClient client = HttpClientFactory.CreateClient("Api");
-            List<ArticleListItemDto>? result = await client.GetFromJsonAsync<List<ArticleListItemDto>>("api/articles");
-            articles = result ?? [];
+            BaseResponseModel<List<ArticleListItemDto>>? response = await client.GetFromJsonAsync<BaseResponseModel<List<ArticleListItemDto>>>("api/articles");
+            articles = response?.Result ?? [];
         }
         catch (Exception ex)
         {

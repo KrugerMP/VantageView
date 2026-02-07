@@ -19,7 +19,7 @@ builder.Services.AddHttpClient("Auth", client => client.BaseAddress = new Uri(au
 
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddControllers();
+builder.Services.AddControllersWithViews();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 

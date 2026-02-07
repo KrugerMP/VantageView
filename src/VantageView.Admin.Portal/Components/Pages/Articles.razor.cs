@@ -69,8 +69,8 @@ public partial class Articles
         try
         {
             HttpClient client = HttpClientFactory.CreateClient("Api");
-            List<ArticleListItemDto>? result = await client.GetFromJsonAsync<List<ArticleListItemDto>>("api/articles");
-            ArticleList = result ?? [];
+            BaseResponseModel<List<ArticleListItemDto>>? response = await client.GetFromJsonAsync<BaseResponseModel<List<ArticleListItemDto>>>("api/articles");
+            ArticleList = response?.Result ?? [];
         }
         catch (Exception ex)
         {

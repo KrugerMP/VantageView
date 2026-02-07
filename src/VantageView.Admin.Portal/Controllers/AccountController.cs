@@ -9,6 +9,7 @@ namespace VantageView.Admin.Portal.Controllers;
 /// <summary>
 /// Handles sign-in and sign-out for the admin portal.
 /// </summary>
+[ApiController]
 public class AccountController : Controller
 {
     private readonly IHttpClientFactory _httpClientFactory;
@@ -69,8 +70,8 @@ public class AccountController : Controller
                 return Redirect("/login?error=invalid");
             }
 
-            LoginResponse? loginResponse = await response.Content.ReadFromJsonAsync<LoginResponse>();
-            if (string.IsNullOrEmpty(loginResponse?.Token))
+            BaseResponseModel<LoginResponse>? loginResponse = await response.Content.ReadFromJsonAsync<BaseResponseModel<LoginResponse>>();
+            if (loginResponse?.Result is null || string.IsNullOrEmpty(loginResponse.Result.Token))
             {
                 _logger.LogWarning("Auth API returned no token.");
                 return Redirect("/login?error=failed");
@@ -79,7 +80,7 @@ public class AccountController : Controller
             List<Claim> claims =
             [
                 new Claim("username", username),
-                new Claim("access_token", loginResponse.Token),
+                new Claim("access_token", loginResponse.Result.Token),
             ];
             ClaimsIdentity identity = new(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             ClaimsPrincipal principal = new(identity);
