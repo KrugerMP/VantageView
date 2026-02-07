@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using VantageView.API.Domain.Articles.Queries;
 using VantageView.API.Models;
 using VantageView.Data;
 using VantageView.Data.Entities;
@@ -14,17 +15,17 @@ namespace VantageView.API.Controllers;
 [Produces("application/json")]
 public class ArticlesController : ControllerBase
 {
-    private readonly AppDbContext _db;
+    private readonly IArticleQueries _articleQueries;
     private readonly ILogger<ArticlesController> _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ArticlesController"/> class.
     /// </summary>
-    /// <param name="db">The database context.</param>
+    /// <param name="articleQueries">The article query service.</param>
     /// <param name="logger">The logger for diagnostics.</param>
-    public ArticlesController(AppDbContext db, ILogger<ArticlesController> logger)
+    public ArticlesController(IArticleQueries articleQueries, ILogger<ArticlesController> logger)
     {
-        _db = db;
+        _articleQueries = articleQueries;
         _logger = logger;
     }
 
@@ -39,10 +40,7 @@ public class ArticlesController : ControllerBase
     {
         try
         {
-            List<ArticleListItemDto> articles = await _db.Articles
-                .OrderByDescending(a => a.PublishedAt)
-                .Select(a => new ArticleListItemDto(a.Id, a.Title, a.Summary, a.Author, a.PublishedAt, a.UpdatedAt))
-                .ToListAsync(ct);
+            List<ArticleListItemDto> articles = await _articleQueries.GetAllArticlesAsync(ct);
 
             return Ok(new BaseResponseModel<List<ArticleListItemDto>>
             {
@@ -76,8 +74,9 @@ public class ArticlesController : ControllerBase
     {
         try
         {
-            Article? article = await _db.Articles.FindAsync([id], ct);
-            if (article is null)
+            ArticleDto? dto = await _articleQueries.GetArticlesByIdAsync(id, ct);
+
+            if (dto is null)
             {
                 return NotFound(new BaseResponseModel<ArticleDto>
                 {
@@ -88,7 +87,6 @@ public class ArticlesController : ControllerBase
                 });
             }
 
-            ArticleDto dto = new(article.Id, article.Title, article.Summary, article.Content, article.Author, article.PublishedAt, article.UpdatedAt);
             return Ok(new BaseResponseModel<ArticleDto>
             {
                 Result = dto,

@@ -1,7 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using VantageView.Data;
-using VantageView.Data.Entities;
 using VantageView.API.Models;
 using VantageView.API.Domain.Health.Queries;
 
